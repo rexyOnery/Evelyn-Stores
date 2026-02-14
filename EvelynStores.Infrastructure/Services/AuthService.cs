@@ -6,12 +6,18 @@ using EvelynStores.Core.DTOs;
 using EvelynStores.Core.Entities;
 using EvelynStores.Core.Models;
 using EvelynStores.Core.Services;
+using EvelynStores.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace EvelynStores.Infrastructure.Services;
 
-public class AuthService(IUserRepository userRepository, IOptions<JwtSettings> jwtSettings) : IAuthService
+public class AuthService(
+    IUserRepository userRepository,
+    IOptions<JwtSettings> jwtSettings,
+    EvelynStoresDbContext dbContext,
+    IEmailService emailService) : IAuthService
 {
     private readonly JwtSettings _jwtSettings = jwtSettings.Value;
 
@@ -93,6 +99,109 @@ public class AuthService(IUserRepository userRepository, IOptions<JwtSettings> j
     public async Task<bool> EmailExistsAsync(string email)
     {
         return await userRepository.EmailExistsAsync(email);
+    }
+
+    public async Task<EvelynPhilApiResponse> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto)
+    {
+        var user = await userRepository.GetByEmailAsync(forgotPasswordDto.Email);
+
+        if (user is null)
+        {
+            return EvelynPhilApiResponse.SuccessResponse("If the email exists, an OTP has been sent.");
+        }
+
+        // Invalidate any existing unused OTPs for this user
+        var existingOtps = await dbContext.PasswordResetOtps
+            .Where(o => o.UserId == user.Id && !o.IsUsed)
+            .ToListAsync();
+
+        foreach (var otp in existingOtps)
+        {
+            otp.IsUsed = true;
+        }
+
+        // Generate a 4-digit OTP
+        var otpCode = RandomNumberGenerator.GetInt32(1000, 10000).ToString();
+
+        var passwordResetOtp = new PasswordResetOtp
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            OtpCode = otpCode,
+            ExpiresAt = DateTime.UtcNow.AddMinutes(10),
+            IsUsed = false,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        dbContext.PasswordResetOtps.Add(passwordResetOtp);
+        await dbContext.SaveChangesAsync();
+
+        await emailService.SendOtpEmailAsync(user.Email, otpCode);
+
+        return EvelynPhilApiResponse.SuccessResponse("If the email exists, an OTP has been sent.");
+    }
+
+    public async Task<EvelynPhilApiResponse<string>> VerifyOtpAsync(VerifyOtpDto verifyOtpDto)
+    {
+        var user = await userRepository.GetByEmailAsync(verifyOtpDto.Email);
+
+        if (user is null)
+        {
+            return EvelynPhilApiResponse<string>.ErrorResponse("Invalid OTP.", 400);
+        }
+
+        var otp = await dbContext.PasswordResetOtps
+            .Where(o => o.UserId == user.Id
+                        && o.OtpCode == verifyOtpDto.OtpCode
+                        && !o.IsUsed
+                        && o.ExpiresAt > DateTime.UtcNow)
+            .OrderByDescending(o => o.CreatedAt)
+            .FirstOrDefaultAsync();
+
+        if (otp is null)
+        {
+            return EvelynPhilApiResponse<string>.ErrorResponse("Invalid or expired OTP.", 400);
+        }
+
+        // Generate a short-lived reset token
+        var resetToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
+
+        otp.IsUsed = true;
+        otp.ResetToken = resetToken;
+        otp.ExpiresAt = DateTime.UtcNow.AddMinutes(15);
+        await dbContext.SaveChangesAsync();
+
+        return EvelynPhilApiResponse<string>.SuccessResponse(resetToken, "OTP verified successfully.");
+    }
+
+    public async Task<EvelynPhilApiResponse> ResetPasswordAsync(ResetPasswordDto resetPasswordDto)
+    {
+        var user = await userRepository.GetByEmailAsync(resetPasswordDto.Email);
+
+        if (user is null)
+        {
+            return EvelynPhilApiResponse.ErrorResponse("Invalid request.", 400);
+        }
+
+        var resetRecord = await dbContext.PasswordResetOtps
+            .Where(o => o.UserId == user.Id
+                        && o.ResetToken == resetPasswordDto.ResetToken
+                        && o.IsUsed
+                        && o.ExpiresAt > DateTime.UtcNow)
+            .FirstOrDefaultAsync();
+
+        if (resetRecord is null)
+        {
+            return EvelynPhilApiResponse.ErrorResponse("Invalid or expired reset token.", 400);
+        }
+
+        resetRecord.ResetToken = null;
+
+        user.PasswordHash = HashPassword(resetPasswordDto.NewPassword);
+        await userRepository.UpdateAsync(user);
+        await dbContext.SaveChangesAsync();
+
+        return EvelynPhilApiResponse.SuccessResponse("Password reset successfully.");
     }
 
     private string GenerateJwtToken(User user)

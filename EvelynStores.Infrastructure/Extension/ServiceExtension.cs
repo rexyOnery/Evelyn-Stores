@@ -17,6 +17,7 @@ public static class ServiceExtension
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
         services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
+        services.Configure<SmtpSettings>(configuration.GetSection("SmtpSettings"));
 
         services.AddRepositories();
         services.AddApplicationServices();
@@ -34,6 +35,7 @@ public static class ServiceExtension
     private static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IEmailService, EmailService>();
 
         return services;
     }

@@ -8,4 +8,7 @@ public interface IAuthService
     Task<EvelynPhilApiResponse<LoginResponseDto>> LoginAsync(LoginDto loginDto);
     Task<bool> EmailExistsAsync(string email);
     Task<EvelynPhilApiResponse> ChangePasswordAsync(Guid userId, ChangePasswordDto changePasswordDto);
+    Task<EvelynPhilApiResponse> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto);
+    Task<EvelynPhilApiResponse<string>> VerifyOtpAsync(VerifyOtpDto verifyOtpDto);
+    Task<EvelynPhilApiResponse> ResetPasswordAsync(ResetPasswordDto resetPasswordDto);
 }

@@ -1,36 +1,234 @@
 ﻿@page "/email-verification"
 @layout AuthLayout
+@rendermode InteractiveServer
+@using EvelynStores.Core.DTOs
+@using EvelynStores.Core.Services
+@using Microsoft.AspNetCore.Components
+@inject IEvelynPhilApiHttpClient ApiClient
+@inject NavigationManager Navigation
+
 <PageTitle>Email Verification</PageTitle>
 
-<form action="reset-password-3.html" class="digit-group">
-    <div class="card">
-        <div class="card-body p-5">
-            <div class="login-userheading">
-                <h3>Email OTP Verification</h3>
-                <h4>OTP sent to your Email Address ending ******doe@example.com</h4>
+<div class="card">
+    <div class="card-body p-5">
+        <div class="login-userheading">
+            <h3>Email OTP Verification</h3>
+            <h4>OTP sent to your Email Address ending @maskedEmail</h4>
+        </div>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger">@errorMessage</div>
+        }
+        @if (!string.IsNullOrEmpty(successMessage))
+        {
+            <div class="alert alert-success">@successMessage</div>
+        }
+
+        <div class="text-center otp-input">
+            <div class="d-flex align-items-center mb-3">
+                <input type="text" class="rounded w-100 py-sm-3 py-2 text-center fs-26 fw-bold me-3"
+                       maxlength="1" value="@digit1" @oninput="(e) => OnDigitInput(e, 1)" inputmode="numeric" />
+                <input type="text" class="rounded w-100 py-sm-3 py-2 text-center fs-26 fw-bold me-3"
+                       maxlength="1" value="@digit2" @oninput="(e) => OnDigitInput(e, 2)" inputmode="numeric" />
+                <input type="text" class="rounded w-100 py-sm-3 py-2 text-center fs-26 fw-bold me-3"
+                       maxlength="1" value="@digit3" @oninput="(e) => OnDigitInput(e, 3)" inputmode="numeric" />
+                <input type="text" class="rounded w-100 py-sm-3 py-2 text-center fs-26 fw-bold"
+                       maxlength="1" value="@digit4" @oninput="(e) => OnDigitInput(e, 4)" inputmode="numeric" />
             </div>
-            <div class="text-center otp-input">
-                <div class="d-flex align-items-center mb-3">
-                    <input type="text" class=" rounded w-100 py-sm-3 py-2 text-center fs-26 fw-bold me-3" id="digit-1" name="digit-1" data-next="digit-2" maxlength="1">
-                    <input type="text" class=" rounded w-100 py-sm-3 py-2 text-center fs-26 fw-bold me-3" id="digit-2" name="digit-2" data-next="digit-3" data-previous="digit-1" maxlength="1">
-                    <input type="text" class=" rounded w-100 py-sm-3 py-2 text-center fs-26 fw-bold me-3" id="digit-3" name="digit-3" data-next="digit-4" data-previous="digit-2" maxlength="1">
-                    <input type="text" class=" rounded w-100 py-sm-3 py-2 text-center fs-26 fw-bold" id="digit-4" name="digit-4" data-next="digit-5" data-previous="digit-3" maxlength="1">
+            <div>
+                <div class="badge bg-danger-transparent mb-3">
+                    <p class="d-flex align-items-center "><i class="ti ti-clock me-1"></i>@timerDisplay</p>
                 </div>
-                <div>
-                    <div class="badge bg-danger-transparent mb-3">
-                        <p class="d-flex align-items-center "><i class="ti ti-clock me-1"></i>09:59</p>
-                    </div>
-                    <div class="mb-3 d-flex justify-content-center">
-                        <p class="text-gray-9">Didn't get the OTP? <a href="javascript:void(0);" class="text-primary">Resend OTP</a></p>
-                    </div>
+                <div class="mb-3 d-flex justify-content-center">
+                    <p class="text-gray-9">Didn't get the OTP?
+                        @if (canResend)
+                        {
+                            <a href="javascript:void(0);" class="text-primary" @onclick="HandleResend">Resend OTP</a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Resend OTP</span>
+                        }
+                    </p>
                 </div>
-            </div>
-            <div class="mb-0">
-                <button type="submit" class="btn btn-primary w-100">Verify & Proceed</button>
             </div>
         </div>
+        <div class="mb-0">
+            <button type="button" class="btn btn-primary w-100" disabled="@isSubmitting" @onclick="HandleVerify">
+                @(isSubmitting ? "Verifying..." : "Verify & Proceed")
+            </button>
+        </div>
     </div>
-</form>
-@code {
+</div>
 
+@code {
+    [SupplyParameterFromQuery]
+    private string? Email { get; set; }
+
+    private string maskedEmail = string.Empty;
+    private string? errorMessage;
+    private string? successMessage;
+    private bool isSubmitting;
+
+    private string digit1 = string.Empty;
+    private string digit2 = string.Empty;
+    private string digit3 = string.Empty;
+    private string digit4 = string.Empty;
+
+    private int remainingSeconds = 600;
+    private string timerDisplay = "10:00";
+    private bool canResend;
+    private System.Threading.Timer? countdownTimer;
+
+    protected override void OnInitialized()
+    {
+        if (string.IsNullOrEmpty(Email))
+        {
+            Navigation.NavigateTo("/forgot-password");
+            return;
+        }
+
+        maskedEmail = MaskEmail(Email);
+        StartCountdown();
+    }
+
+    private void StartCountdown()
+    {
+        remainingSeconds = 600;
+        canResend = false;
+        UpdateTimerDisplay();
+
+        countdownTimer?.Dispose();
+        countdownTimer = new System.Threading.Timer(async _ =>
+        {
+            remainingSeconds--;
+
+            if (remainingSeconds <= 0)
+            {
+                remainingSeconds = 0;
+                canResend = true;
+                countdownTimer?.Dispose();
+            }
+
+            UpdateTimerDisplay();
+            await InvokeAsync(StateHasChanged);
+        }, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+    }
+
+    private void UpdateTimerDisplay()
+    {
+        var minutes = remainingSeconds / 60;
+        var seconds = remainingSeconds % 60;
+        timerDisplay = $"{minutes:D2}:{seconds:D2}";
+    }
+
+    private void OnDigitInput(ChangeEventArgs e, int position)
+    {
+        var value = e.Value?.ToString() ?? string.Empty;
+        // Keep only the last character if multiple are entered
+        if (value.Length > 1) value = value[^1..];
+
+        switch (position)
+        {
+            case 1: digit1 = value; break;
+            case 2: digit2 = value; break;
+            case 3: digit3 = value; break;
+            case 4: digit4 = value; break;
+        }
+    }
+
+    private async Task HandleVerify()
+    {
+        errorMessage = null;
+        successMessage = null;
+
+        var otpCode = $"{digit1}{digit2}{digit3}{digit4}";
+
+        if (otpCode.Length != 4)
+        {
+            errorMessage = "Please enter all 4 digits.";
+            return;
+        }
+
+        isSubmitting = true;
+
+        try
+        {
+            var verifyDto = new VerifyOtpDto
+            {
+                Email = Email!,
+                OtpCode = otpCode
+            };
+
+            var response = await ApiClient.PostAsync<string>("/api/auth/verify-otp", verifyDto);
+
+            if (response.Success && response.Data is not null)
+            {
+                countdownTimer?.Dispose();
+                var encodedEmail = Uri.EscapeDataString(Email!);
+                var encodedToken = Uri.EscapeDataString(response.Data);
+                Navigation.NavigateTo($"/reset-password?email={encodedEmail}&token={encodedToken}");
+            }
+            else
+            {
+                errorMessage = response.Message;
+            }
+        }
+        catch (Exception)
+        {
+            errorMessage = "An unexpected error occurred. Please try again.";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private async Task HandleResend()
+    {
+        errorMessage = null;
+        successMessage = null;
+
+        try
+        {
+            var forgotDto = new ForgotPasswordDto { Email = Email! };
+            var response = await ApiClient.PostAsync("/api/auth/forgot-password", forgotDto);
+
+            if (response.Success)
+            {
+                successMessage = "A new OTP has been sent to your email.";
+                digit1 = digit2 = digit3 = digit4 = string.Empty;
+                StartCountdown();
+            }
+            else
+            {
+                errorMessage = response.Message;
+            }
+        }
+        catch (Exception)
+        {
+            errorMessage = "Failed to resend OTP. Please try again.";
+        }
+    }
+
+    private static string MaskEmail(string email)
+    {
+        var parts = email.Split('@');
+        if (parts.Length != 2) return email;
+
+        var local = parts[0];
+        var domain = parts[1];
+
+        var maskedLocal = local.Length <= 2
+            ? new string('*', local.Length)
+            : string.Concat(new string('*', local.Length - 2), local.AsSpan(local.Length - 2));
+
+        return $"{maskedLocal}@{domain}";
+    }
+
+    public void Dispose()
+    {
+        countdownTimer?.Dispose();
+    }
 }

@@ -18,6 +18,7 @@ namespace EvelynStores.Infrastructure.Data
         }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<PasswordResetOtp> PasswordResetOtps { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -30,6 +31,17 @@ namespace EvelynStores.Infrastructure.Data
                 entity.Property(u => u.Name).IsRequired().HasMaxLength(100);
                 entity.Property(u => u.Email).IsRequired().HasMaxLength(256);
                 entity.Property(u => u.PasswordHash).IsRequired();
+            });
+
+            modelBuilder.Entity<PasswordResetOtp>(entity =>
+            {
+                entity.HasKey(o => o.Id);
+                entity.Property(o => o.OtpCode).IsRequired().HasMaxLength(4);
+                entity.Property(o => o.ResetToken).HasMaxLength(256);
+                entity.HasOne(o => o.User)
+                    .WithMany()
+                    .HasForeignKey(o => o.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

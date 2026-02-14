@@ -75,4 +75,58 @@ public class AuthController(IAuthService authService) : ControllerBase
 
         return StatusCode(result.StatusCode, result);
     }
+
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto forgotPasswordDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState.Values
+                .SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage)
+                .ToList();
+
+            return BadRequest(EvelynPhilApiResponse.ErrorResponse("Validation failed.", 400, errors));
+        }
+
+        var result = await authService.ForgotPasswordAsync(forgotPasswordDto);
+
+        return StatusCode(result.StatusCode, result);
+    }
+
+    [HttpPost("verify-otp")]
+    public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtpDto verifyOtpDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState.Values
+                .SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage)
+                .ToList();
+
+            return BadRequest(EvelynPhilApiResponse.ErrorResponse("Validation failed.", 400, errors));
+        }
+
+        var result = await authService.VerifyOtpAsync(verifyOtpDto);
+
+        return StatusCode(result.StatusCode, result);
+    }
+
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState.Values
+                .SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage)
+                .ToList();
+
+            return BadRequest(EvelynPhilApiResponse.ErrorResponse("Validation failed.", 400, errors));
+        }
+
+        var result = await authService.ResetPasswordAsync(resetPasswordDto);
+
+        return StatusCode(result.StatusCode, result);
+    }
 }
