@@ -1,0 +1,6 @@
+@EvelynStores.API_HostAddress = http://localhost:5082
+
+GET {{EvelynStores.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

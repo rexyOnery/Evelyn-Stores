@@ -1,0 +1,129 @@
+﻿@page "/"
+@layout AuthLayout
+@rendermode InteractiveServer
+@using EvelynStores.Core.DTOs
+@using EvelynStores.Core.Services
+@inject IEvelynPhilApiHttpClient ApiClient
+@inject NavigationManager Navigation
+
+<PageTitle>Sign In</PageTitle>
+
+<EditForm Model="LoginModel" OnValidSubmit="HandleLogin" FormName="loginForm">
+    <DataAnnotationsValidator />
+    <div class="card">
+        <div class="card-body p-5">
+            <div class="login-userheading">
+                <h3>Sign In</h3>
+                <h4>Access EvePhil Supermarket using your email and passcode.</h4>
+            </div>
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger">@errorMessage</div>
+            }
+
+            <div class="mb-3">
+                <label class="form-label">Email <span class="text-danger"> *</span></label>
+                <div class="input-group">
+                    <InputText @bind-Value="LoginModel.Email" class="form-control border-end-0" />
+                    <span class="input-group-text border-start-0">
+                        <i class="ti ti-mail"></i>
+                    </span>
+                </div>
+                <ValidationMessage For="@(() => LoginModel.Email)" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Password <span class="text-danger"> *</span></label>
+                <div class="pass-group">
+                    <InputText type="password" @bind-Value="LoginModel.Password" class="pass-input form-control" />
+                    <span class="ti toggle-password ti-eye-off text-gray-9"></span>
+                </div>
+                <ValidationMessage For="@(() => LoginModel.Password)" />
+            </div>
+            <div class="form-login authentication-check">
+                <div class="row">
+                    <div class="col-12 d-flex align-items-center justify-content-between">
+                        <div class="custom-control custom-checkbox">
+                            <label class="checkboxs ps-4 mb-0 pb-0 line-height-1 fs-16 text-gray-6">
+                                <InputCheckbox @bind-Value="LoginModel.RememberMe" class="form-control" />
+                                <span class="checkmarks"></span>Remember me
+                            </label>
+                        </div>
+                        <div class="text-end">
+                            <a class="text-orange fs-16 fw-medium" href="/forgot-password">Forgot Password?</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-login">
+                <button type="submit" class="btn btn-primary w-100" disabled="@isSubmitting">
+                    @(isSubmitting ? "Signing In..." : "Sign In")
+                </button>
+            </div>
+            <div class="signinform">
+                <h4>New on our platform?<a href="/register" class="hover-a"> Create an account</a></h4>
+            </div>
+            
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [SupplyParameterFromForm]
+    private LoginDto LoginModel { get; set; } = new();
+
+    private string? errorMessage;
+    private bool isSubmitting;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var savedEmail = await ApiClient.GetRememberMeEmailAsync();
+            if (!string.IsNullOrEmpty(savedEmail))
+            {
+                LoginModel.Email = savedEmail;
+                LoginModel.RememberMe = true;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task HandleLogin()
+    {
+        errorMessage = null;
+        isSubmitting = true;
+
+        try
+        {
+            var response = await ApiClient.PostAsync<LoginResponseDto>("/api/auth/login", LoginModel);
+
+            if (response.Success && response.Data is not null)
+            {
+                if (LoginModel.RememberMe)
+                {
+                    await ApiClient.SetRememberMeEmailAsync(LoginModel.Email);
+                }
+                else
+                {
+                    await ApiClient.SetRememberMeEmailAsync(null);
+                }
+
+                await ApiClient.SetAuthTokenAsync(response.Data.AccessToken, LoginModel.RememberMe);
+                Navigation.NavigateTo("/dashboard", forceLoad: true);
+            }
+            else
+            {
+                errorMessage = response.Message;
+            }
+        }
+        catch (Exception)
+        {
+            errorMessage = "An unexpected error occurred. Please try again.";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}

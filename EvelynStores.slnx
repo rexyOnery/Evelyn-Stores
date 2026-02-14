@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/EvelynStores.Shared/">
+    <Project Path="EvelynStores.Application/EvelynStores.Application.csproj" />
+    <Project Path="EvelynStores.Core/EvelynStores.Core.csproj" />
+    <Project Path="EvelynStores.Infrastructure/EvelynStores.Infrastructure.csproj" />
+  </Folder>
+  <Project Path="EvelynStores.API/EvelynStores.API.csproj" />
+  <Project Path="EvelynStores.Web/EvelynStores.Web.csproj" />
+</Solution>

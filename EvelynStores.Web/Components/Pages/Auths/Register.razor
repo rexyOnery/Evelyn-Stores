@@ -1,0 +1,135 @@
+﻿@page "/register"
+@layout AuthLayout
+@rendermode InteractiveServer
+@using EvelynStores.Core.DTOs
+@using EvelynStores.Core.Services
+@inject IEvelynPhilApiHttpClient ApiClient
+@inject NavigationManager Navigation
+
+<PageTitle>Register</PageTitle>
+
+<EditForm Model="RegisterModel" OnValidSubmit="HandleRegister" FormName="registerForm">
+    <DataAnnotationsValidator />
+    <div class="card">
+        <div class="card-body p-5">
+            <div class="login-userheading">
+                <h3>Register</h3>
+                <h4>Create New EvePhil Supermarket Account</h4>
+            </div>
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger">@errorMessage</div>
+            }
+            @if (!string.IsNullOrEmpty(successMessage))
+            {
+                <div class="alert alert-success">@successMessage</div>
+            }
+
+            <div class="mb-3">
+                <label class="form-label">Name <span class="text-danger"> *</span></label>
+                <div class="input-group">
+                    <InputText @bind-Value="RegisterModel.Name" class="form-control border-end-0" />
+                    <span class="input-group-text border-start-0">
+                        <i class="ti ti-user"></i>
+                    </span>
+                </div>
+                <ValidationMessage For="@(() => RegisterModel.Name)" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Email <span class="text-danger"> *</span></label>
+                <div class="input-group">
+                    <InputText @bind-Value="RegisterModel.Email" class="form-control border-end-0" />
+                    <span class="input-group-text border-start-0">
+                        <i class="ti ti-mail"></i>
+                    </span>
+                </div>
+                <ValidationMessage For="@(() => RegisterModel.Email)" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Password <span class="text-danger"> *</span></label>
+                <div class="pass-group">
+                    <InputText type="password" @bind-Value="RegisterModel.Password" class="pass-input form-control" />
+                    <span class="ti toggle-password ti-eye-off text-gray-9"></span>
+                </div>
+                <ValidationMessage For="@(() => RegisterModel.Password)" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Confirm Password <span class="text-danger"> *</span></label>
+                <div class="pass-group">
+                    <InputText type="password" @bind-Value="RegisterModel.ConfirmPassword" class="pass-inputs form-control" />
+                    <span class="ti toggle-passwords ti-eye-off text-gray-9"></span>
+                </div>
+                <ValidationMessage For="@(() => RegisterModel.ConfirmPassword)" />
+            </div>
+            <div class="form-login authentication-check">
+                <div class="row">
+                    <div class="col-sm-8">
+                        <div class="custom-control custom-checkbox justify-content-start">
+                            <div class="custom-control custom-checkbox">
+                                <label class="checkboxs ps-4 mb-0 pb-0 line-height-1">
+                                    <InputCheckbox @bind-Value="RegisterModel.AgreeToTerms" />
+                                    <span class="checkmarks"></span>I agree to the <a href="#" class="text-primary">Terms & Privacy</a>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-login">
+                <button type="submit" class="btn btn-login" disabled="@isSubmitting">
+                    @(isSubmitting ? "Signing Up..." : "Sign Up")
+                </button>
+            </div>
+            <div class="signinform">
+                <h4>Already have an account ? <a href="/" class="hover-a">Sign In Instead</a></h4>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [SupplyParameterFromForm]
+    private RegisterDto RegisterModel { get; set; } = new();
+
+    private string? errorMessage;
+    private string? successMessage;
+    private bool isSubmitting;
+
+    private async Task HandleRegister()
+    {
+        errorMessage = null;
+        successMessage = null;
+
+        if (!RegisterModel.AgreeToTerms)
+        {
+            errorMessage = "You must agree to the Terms & Privacy.";
+            return;
+        }
+
+        isSubmitting = true;
+
+        try
+        {
+            var response = await ApiClient.PostAsync("/api/auth/register", RegisterModel);
+
+            if (response.Success)
+            {
+                successMessage = response.Message;
+                Navigation.NavigateTo("/");
+            }
+            else
+            {
+                errorMessage = response.Message;
+            }
+        }
+        catch (Exception)
+        {
+            errorMessage = "An unexpected error occurred. Please try again.";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}
