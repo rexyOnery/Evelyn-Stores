@@ -2,6 +2,7 @@
 @layout AuthLayout
 @rendermode InteractiveServer
 @using EvelynStores.Core.DTOs
+@using EvelynStores.Core.Enums
 @using EvelynStores.Core.Services
 @inject IEvelynPhilApiHttpClient ApiClient
 @inject NavigationManager Navigation
@@ -59,6 +60,20 @@
                 <div class="pass-group">
                     <InputText type="password" @bind-Value="RegisterModel.ConfirmPassword" class="pass-inputs form-control" />
                     <span class="ti toggle-passwords ti-eye-off text-gray-9"></span>
+                </div>
+                <ValidationMessage For="@(() => RegisterModel.ConfirmPassword)" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">User Type <span class="text-danger"> *</span></label>
+                <div class="pass-group">
+                    <select class="form-select" @onchange="OnUserTypeChange" disabled="@isSubmitting">
+                        <option value="0">Select User Type</option> 
+                        @foreach (UserType status in Enum.GetValues<UserType>())
+                        { 
+                                <option value="@((int)status)">@status.ToString()</option>
+                            
+                        }
+                    </select>
                 </div>
                 <ValidationMessage For="@(() => RegisterModel.ConfirmPassword)" />
             </div>
@@ -130,6 +145,13 @@
         finally
         {
             isSubmitting = false;
+        }
+    }
+    private void OnUserTypeChange(ChangeEventArgs args)
+    {
+        if (int.TryParse(args.Value?.ToString(), out var value))
+        {
+            RegisterModel.UserType = value;
         }
     }
 }

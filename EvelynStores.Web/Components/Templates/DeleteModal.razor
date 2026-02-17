@@ -1,0 +1,43 @@
+﻿@inject IJSRuntime JS
+
+<!-- delete modal -->
+<div class="modal fade" id="delete-modal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="page-wrapper-new p-0">
+				<div class="content p-5 px-3 text-center">
+					<span class="rounded-circle d-inline-flex p-2 bg-danger-transparent mb-2"><i class="ti ti-trash fs-24 text-danger"></i></span>
+					<h4 class="fs-20 fw-bold mb-2 mt-1">Delete @Entity</h4>
+					<p class="mb-0 fs-16">Are you sure you want to delete this @Entity?</p>
+					<div class="modal-footer-btn mt-3 d-flex justify-content-center">
+						<button type="button" class="btn me-2 btn-secondary fs-13 fw-medium p-2 px-3 shadow-none" data-bs-dismiss="modal">Cancel</button>
+						<button @onclick="ConfirmDelete" type="button" class="btn btn-primary fs-13 fw-medium p-2 px-3">Yes Delete</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+@code {
+	[Parameter]
+	public Guid? EntityId { get; set; }
+	[Parameter]
+	public string? Entity { get; set; }
+
+	[Parameter]
+	public EventCallback<Guid> OnConfirm { get; set; }
+
+	private async Task ConfirmDelete()
+	{
+		if (EntityId.HasValue && OnConfirm.HasDelegate)
+		{
+			await OnConfirm.InvokeAsync(EntityId.Value);
+		}
+
+		try
+		{
+			await JS.InvokeVoidAsync("eval", "$('#delete-modal').modal('hide');");
+		}
+		catch { }
+	}
+}

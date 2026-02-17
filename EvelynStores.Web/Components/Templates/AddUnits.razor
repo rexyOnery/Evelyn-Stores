@@ -1,0 +1,74 @@
+﻿@using EvelynStores.Core.DTOs
+@inject IJSRuntime JS
+
+<!-- Add Unit -->
+<div class="modal fade" id="add-units" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<div class="page-title">
+					<h4>Add Unit</h4>
+				</div>
+				<button type="button" class="close bg-danger text-white fs-16" data-bs-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<EditForm Model="@Model" OnValidSubmit="HandleValidSubmit">
+				<DataAnnotationsValidator />
+				<div class="modal-body">
+					<ValidationSummary />
+					<div class="mb-3">
+						<label class="form-label">Unit<span class="text-danger ms-1">*</span></label>
+						<InputText class="form-control" @bind-Value="Model.Name" />
+					</div>
+					<div class="mb-3">
+						<label class="form-label">Short Name<span class="text-danger ms-1">*</span></label>
+						<InputText class="form-control" @bind-Value="Model.ShortName" />
+					</div>
+					<div class="mb-0">
+						<div class="status-toggle modal-status d-flex justify-content-between align-items-center">
+							<span class="status-label">Status</span>
+							<InputCheckbox id="unit-isactive" class="check" @bind-Value="Model.IsActive" />
+							<label for="unit-isactive" class="checktoggle"></label>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn me-2 btn-secondary" data-bs-dismiss="modal">Cancel</button>
+					<button type="submit" class="btn btn-primary">Add Unit</button>
+				</div>
+			</EditForm>
+		</div>
+	</div>
+</div>
+<!-- /Add Unit -->
+
+@code {
+	[Parameter]
+	public EventCallback<UnitDto> OnSave { get; set; }
+
+	private UnitDto Model { get; set; } = new UnitDto();
+
+	private async Task HandleValidSubmit()
+	{
+		// invoke parent callback
+		if (OnSave.HasDelegate)
+		{
+			await OnSave.InvokeAsync(Model);
+		}
+
+		// hide modal (uses jQuery/bootstrap included in template)
+		try
+		{
+			await JS.InvokeVoidAsync("eval", "$('#add-units').modal('hide');");
+		}
+		catch
+		{
+			// ignore JS errors
+		}
+
+		// reset model
+		Model = new UnitDto();
+		StateHasChanged();
+	}
+}

@@ -28,6 +28,7 @@ public static class ServiceExtension
     private static IServiceCollection AddRepositories(this IServiceCollection services)
     {
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IUnitRepository, UnitRepository>();
 
         return services;
     }
@@ -36,6 +37,7 @@ public static class ServiceExtension
     {
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<IUnitService, UnitService>();
 
         return services;
     }

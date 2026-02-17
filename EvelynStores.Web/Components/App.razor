@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-layout="horizontal">
 
 <head>
     <meta charset="utf-8" />
@@ -11,15 +11,10 @@
     <meta name="keywords" content="inventory management, admin dashboard, bootstrap template, invoicing, estimates, business management, responsive admin, POS system">
     <meta name="author" content="Sylvester Ameh Technologies">
     <meta name="robots" content="index, follow">
-    <title>Evelyn Stores</title>
+    <title>EvePhil Supermarket</title>
 
     <base href="/" />
     <ResourcePreloader />
-    <link rel="stylesheet" href="@Assets["lib/bootstrap/dist/css/bootstrap.min.css"]" />
-    <link rel="stylesheet" href="@Assets["app.css"]" />
-    <link rel="stylesheet" href="@Assets["EvelynStores.Web.styles.css"]" />
-
-
     <!-- Favicon -->
     <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.png">
 
@@ -29,13 +24,27 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="assets/css/bootstrap.min.css">
 
-    <!-- Fontawesome CSS -->
-    <link rel="stylesheet" href="assets/plugins/fontawesome/css/fontawesome.min.css">
-    <link rel="stylesheet" href="assets/plugins/fontawesome/css/all.min.css">
+    <!-- Datetimepicker CSS -->
+    <link rel="stylesheet" href="assets/css/bootstrap-datetimepicker.min.css">
+
+    <!-- animation CSS -->
+    <link rel="stylesheet" href="assets/css/animate.css">
+
+    <!-- Select2 CSS -->
+    <link rel="stylesheet" href="assets/plugins/select2/css/select2.min.css">
+
+    <!-- Daterangepikcer CSS -->
+    <link rel="stylesheet" href="assets/plugins/daterangepicker/daterangepicker.css">
 
     <!-- Tabler Icon CSS -->
     <link rel="stylesheet" href="assets/plugins/tabler-icons/tabler-icons.min.css">
 
+    <!-- Fontawesome CSS -->
+    <link rel="stylesheet" href="assets/plugins/fontawesome/css/fontawesome.min.css">
+    <link rel="stylesheet" href="assets/plugins/fontawesome/css/all.min.css">
+
+    <!-- Color Picker Css -->
+    <link rel="stylesheet" href="assets/plugins/@@simonwep/pickr/themes/nano.min.css">
 
     <!-- Main CSS -->
     <link rel="stylesheet" href="assets/css/style.css">
@@ -46,22 +55,48 @@
     <HeadOutlet @rendermode="InteractiveServer" />
 </head>
 
-<body>
+<body class="menu-horizontal">
+    <div id="global-loader">
+        <div class="whirly-loader"> </div>
+    </div>
     <Routes @rendermode="InteractiveServer" />
     <ReconnectModal />
     <script src="@Assets["_framework/blazor.web.js"]"></script>
     <!-- /Main Wrapper -->
-    <!-- jQuery -->
+    <!-- jQuery --> 
     <script src="assets/js/jquery-3.7.1.min.js"></script>
 
     <!-- Feather Icon JS -->
     <script src="assets/js/feather.min.js"></script>
 
+    <!-- Slimscroll JS -->
+    <script src="assets/js/jquery.slimscroll.min.js"></script>
+
     <!-- Bootstrap Core JS -->
     <script src="assets/js/bootstrap.bundle.min.js"></script>
 
+    <!-- Daterangepikcer JS -->
+    <script src="assets/js/moment.min.js"></script>
+    <script src="assets/plugins/daterangepicker/daterangepicker.js"></script>
+
+    <!-- Chart JS -->
+    <script src="assets/plugins/chartjs/chart.min.js"></script>
+    <script src="assets/plugins/chartjs/chart-data.js"></script>
+
+    <!-- Select2 JS -->
+    <script src="assets/plugins/select2/js/select2.min.js"></script>
+
+    <!-- Chart JS -->
+    <script src="assets/plugins/apexchart/apexcharts.min.js"></script>
+    <script src="assets/plugins/apexchart/chart-data.js"></script>
+
+    <!-- Color Picker JS -->
+    <script src="assets/plugins/@@simonwep/pickr/pickr.es5.min.js"></script>
+
     <!-- Custom JS -->
+    <script src="assets/js/theme-colorpicker.js"></script>
     <script src="assets/js/script.js"></script>
+
 </body>
 
 </html>

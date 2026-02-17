@@ -34,6 +34,7 @@ public class AuthService(
             Name = registerDto.Name.Trim(),
             Email = registerDto.Email.Trim().ToLowerInvariant(),
             PasswordHash = HashPassword(registerDto.Password),
+            UserType = registerDto.UserType,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -65,6 +66,7 @@ public class AuthService(
             RefreshToken = refreshToken,
             ExpiresIn = _jwtSettings.ExpirationMinutes * 60,
             UserName = user.Name,
+            UserType = user.UserType,
             Email = user.Email
         };
 

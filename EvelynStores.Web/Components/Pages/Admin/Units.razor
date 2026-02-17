@@ -1,0 +1,300 @@
+﻿@page "/admin/units"
+@using EvelynStores.Core.DTOs
+@using EvelynStores.Core.Services
+@inject IEvelynPhilApiHttpClient ApiClient
+@inject IJSRuntime JS
+
+<PageTitle>Units</PageTitle>
+
+<div class="content">
+	<div class="page-header">
+		<div class="add-item d-flex">
+			<div class="page-title">
+				<h4 class="fw-bold">Units</h4>
+				<h6>Manage your units</h6>
+			</div>
+		</div>
+		<ul class="table-top-head">
+			<li>
+				<a data-bs-toggle="tooltip" data-bs-placement="top" title="Pdf"><img src="assets/img/icons/pdf.svg" alt="img"></a>
+			</li>
+			<li>
+				<a data-bs-toggle="tooltip" data-bs-placement="top" title="Excel"><img src="assets/img/icons/excel.svg" alt="img"></a>
+			</li>
+			<li>
+				<a data-bs-toggle="tooltip" data-bs-placement="top" title="Refresh" @onclick="LoadUnits"><i class="ti ti-refresh"></i></a>
+			</li>
+			<li>
+				<a data-bs-toggle="tooltip" data-bs-placement="top" title="Collapse" id="collapse-header"><i class="ti ti-chevron-up"></i></a>
+			</li>
+		</ul>
+		<div class="page-btn">
+			<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add-units"><i class="ti ti-circle-plus me-1"></i>Add Unit</button>
+		</div>
+	</div>
+
+	<div class="mt-3">
+		@if (!string.IsNullOrEmpty(successMessage))
+		{
+			<div class="alert alert-success alert-dismissible fade show" role="alert">
+				@successMessage
+				<button type="button" class="btn-close" aria-label="Close" @onclick="() => ClearMessages()"></button>
+			</div>
+		}
+		@if (!string.IsNullOrEmpty(errorMessage))
+		{
+			<div class="alert alert-danger alert-dismissible fade show" role="alert">
+				@errorMessage
+				<button type="button" class="btn-close" aria-label="Close" @onclick="() => ClearMessages()"></button>
+			</div>
+		}
+	</div>
+
+	<div class="card">
+		<div class="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3">
+			<div class="search-set">
+				<div class="search-input">
+					<span class="btn-searchset"><i class="ti ti-search fs-14 feather-search"></i></span>
+				</div>
+			</div>
+			<div class="table-dropdown my-xl-auto right-content">
+				<div class="dropdown">
+					<a href="javascript:void(0);" class="dropdown-toggle btn btn-white btn-md d-inline-flex align-items-center" data-bs-toggle="dropdown">
+						Status
+					</a>
+					<ul class="dropdown-menu  dropdown-menu-end p-3">
+						<li>
+							<a href="javascript:void(0);" class="dropdown-item rounded-1">Active</a>
+						</li>
+						<li>
+							<a href="javascript:void(0);" class="dropdown-item rounded-1">Inactive</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<div class="card-body p-0">
+			<div class="table-responsive">
+				<table class="table datatable">
+					<thead class="thead-light">
+						<tr>
+							<th class="no-sort">
+								<label class="checkboxs">
+									<input type="checkbox" id="select-all">
+									<span class="checkmarks"></span>
+								</label>
+							</th>
+							<th>Unit</th>
+							<th>Short name</th>
+							<th>No of Products</th>
+							<th>Created Date</th>
+							<th>Status</th>
+							<th class="no-sort"></th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var u in UnitList)
+						{
+							<tr>
+								<td>
+									<label class="checkboxs">
+										<input type="checkbox">
+										<span class="checkmarks"></span>
+									</label>
+								</td>
+								<td class="text-gray-9">@u.Name</td>
+								<td>@u.ShortName</td>
+								<td>@u.NoOfProducts</td>
+								<td>@u.CreatedAt.ToString("dd MMM yyyy")</td>
+								<td>
+									<span class="badge table-badge @(u.IsActive ? "bg-success" : "bg-danger") fw-medium fs-10">@(u.IsActive ? "Active" : "Inactive")</span>
+								</td>
+								<td class="action-table-data">
+									<div class="edit-delete-action">
+										<button type="button" class="me-2 p-2 btn btn-link" title="Edit" @onclick="() => OpenEdit(u)">
+											<i class="feather-edit"></i>
+										</button>
+										<button type="button" class="p-2 btn btn-link text-danger" title="Delete" @onclick="() => OpenDelete(u.Id)">
+											<i data-feather="trash-2" class="ti ti-trash-2"></i>
+										</button>
+									</div>
+								
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	<!-- /product list -->
+</div>
+
+<AddUnits OnSave="HandleAddUnit" />
+<EditUnits Unit="SelectedUnitForEdit" OnSave="HandleEditSave" />
+<DeleteModal EntityId="SelectedUnitForDelete" Entity="Unit" OnConfirm="HandleDeleteConfirmed" />
+
+@code {
+	private List<UnitDto> UnitList { get; set; } = new();
+	private string? errorMessage;
+	private string? successMessage;
+	private bool isLoading;
+
+	private UnitDto? SelectedUnitForEdit { get; set; }
+	private Guid? SelectedUnitForDelete { get; set; }
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadUnits();
+	}
+
+	private async Task LoadUnits()
+	{
+		errorMessage = null;
+		isLoading = true;
+		try
+		{
+			var resp = await ApiClient.GetAsync<List<UnitDto>>("/api/units");
+			if (resp != null && resp.Success)
+			{
+				UnitList = resp.Data ?? new List<UnitDto>();
+			}
+			else
+			{
+				UnitList = new List<UnitDto>();
+				errorMessage = resp?.Message ?? "Failed to load units from server.";
+				ShowMessage(errorMessage, isSuccess: false);
+			}
+		}
+		catch (Exception ex)
+		{
+			// surface minimal message
+			errorMessage = "Failed to load units from server.";
+			UnitList = new List<UnitDto>();
+			ShowMessage(errorMessage, isSuccess: false);
+		}
+		finally
+		{
+			isLoading = false;
+		}
+	}
+
+	private async Task HandleAddUnit(UnitDto unit)
+	{
+		// optimistic update
+		unit.CreatedAt = DateTime.UtcNow;
+		UnitList.Insert(0, unit);
+		StateHasChanged();
+
+		try
+		{
+			var resp = await ApiClient.PostAsync<UnitDto>("/api/units", unit);
+			if (resp != null && resp.Success)
+			{
+				var created = resp.Data ?? unit;
+				var idx = UnitList.FindIndex(u => u.Id == unit.Id || (u.Name == unit.Name && u.ShortName == unit.ShortName && u.CreatedAt == unit.CreatedAt));
+				if (idx >= 0)
+				{
+					UnitList[idx] = created;
+				}
+				else
+				{
+					UnitList.Insert(0, created);
+				}
+				ShowMessage("Unit added", isSuccess: true);
+			}
+			else
+			{
+				// API failed - revert optimistic insert
+				UnitList.RemoveAll(u => u.Name == unit.Name && u.ShortName == unit.ShortName && u.CreatedAt == unit.CreatedAt);
+				errorMessage = resp?.Message ?? "Failed to create unit.";
+				ShowMessage(errorMessage, isSuccess: false);
+			}
+		}
+		catch
+		{
+			UnitList.RemoveAll(u => u.Name == unit.Name && u.ShortName == unit.ShortName && u.CreatedAt == unit.CreatedAt);
+			errorMessage = "Failed to create unit.";
+			ShowMessage(errorMessage, isSuccess: false);
+		}
+		StateHasChanged();
+	}
+
+	private async Task OpenEdit(UnitDto unit)
+	{
+		SelectedUnitForEdit = unit;
+		// show modal
+		await JS.InvokeVoidAsync("eval", "$('#edit-units').modal('show');");
+	}
+
+	private async Task HandleEditSave(UnitDto edited)
+	{
+		try
+		{
+			var resp = await ApiClient.PutAsync<UnitDto>($"/api/units/{edited.Id}", edited);
+			if (resp != null && resp.Success)
+			{
+				var idx = UnitList.FindIndex(u => u.Id == edited.Id);
+				if (idx >= 0) UnitList[idx] = resp.Data ?? edited;
+				ShowMessage("Unit updated", isSuccess: true);
+			}
+			else
+			{
+				errorMessage = resp?.Message ?? "Failed to update unit.";
+				ShowMessage(errorMessage, isSuccess: false);
+			}
+		}
+		catch
+		{
+			errorMessage = "Failed to update unit.";
+			ShowMessage(errorMessage, isSuccess: false);
+		}
+	}
+
+	private async Task OpenDelete(Guid id)
+	{
+		SelectedUnitForDelete = id;
+		await JS.InvokeVoidAsync("eval", "$('#delete-modal').modal('show');");
+	}
+
+	private async Task HandleDeleteConfirmed(Guid id)
+	{
+		try
+		{
+			var resp = await ApiClient.DeleteAsync($"/api/units/{id}");
+			if (resp != null && resp.Success)
+			{
+				UnitList.RemoveAll(u => u.Id == id);
+				ShowMessage("Unit deleted", isSuccess: true);
+			}
+			else
+			{
+				errorMessage = resp?.Message ?? "Failed to delete unit.";
+				ShowMessage(errorMessage, isSuccess: false);
+			}
+		}
+		catch
+		{
+			errorMessage = "Failed to delete unit.";
+			ShowMessage(errorMessage, isSuccess: false);
+		}
+	}
+
+	private void ClearMessages()
+	{
+		successMessage = null;
+		errorMessage = null;
+	}
+
+	private async void ShowMessage(string? message, bool isSuccess)
+	{
+		if (isSuccess) successMessage = message;
+		else errorMessage = message;
+		StateHasChanged();
+
+		// auto-clear after 4 seconds
+		await Task.Delay(4000);
+		ClearMessages();
+		StateHasChanged();
+	}
+}

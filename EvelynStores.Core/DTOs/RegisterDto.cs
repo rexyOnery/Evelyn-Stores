@@ -1,3 +1,4 @@
+using EvelynStores.Core.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace EvelynStores.Core.DTOs;
@@ -20,5 +21,9 @@ public class RegisterDto
     [Compare(nameof(Password), ErrorMessage = "Passwords do not match")]
     public string ConfirmPassword { get; set; } = string.Empty;
 
+    [Required(ErrorMessage = "User Type is required")]
+    public int UserType { get; set; } = 3;
+
     public bool AgreeToTerms { get; set; }
+ 
 }
