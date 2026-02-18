@@ -1,7 +1,8 @@
 using Blazored.LocalStorage;
 using Blazored.SessionStorage;
 using EvelynStores.Core.Services;
-using EvelynStores.Web.Components;
+using EvelynStores.Web.Components; 
+using EvelynStores.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,9 @@ builder.Services.AddHttpClient<IEvelynPhilApiHttpClient, EvelynPhilApiHttpClient
 {
     client.BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"] ?? "https://localhost:7001");
 });
+
+// Toast service for Blazor components
+builder.Services.AddSingleton<ToastService>();
 
 var app = builder.Build();
 

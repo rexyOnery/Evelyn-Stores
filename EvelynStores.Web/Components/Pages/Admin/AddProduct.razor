@@ -1,4 +1,13 @@
 ﻿@page "/admin/add-product"
+@using EvelynStores.Core.DTOs
+@using System.Text.Json
+@using System.Net.Http.Headers
+@using Microsoft.AspNetCore.Components.Forms
+@inject IEvelynPhilApiHttpClient ApiClient
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+@inject EvelynStores.Web.Services.ToastService ToastService
+
 <PageTitle>Add Product</PageTitle>
 
 <div class="content">
@@ -11,19 +20,21 @@
         </div>
         <ul class="table-top-head">
             <li>
-                <a data-bs-toggle="tooltip" data-bs-placement="top" title="Refresh"><i class="ti ti-refresh"></i></a>
+                <button class="btn btn-link p-0" type="button" title="Refresh" @onclick="RefreshForm"><i class="ti ti-refresh"></i></button>
             </li>
             <li>
                 <a data-bs-toggle="tooltip" data-bs-placement="top" title="Collapse" id="collapse-header"><i class="ti ti-chevron-up"></i></a>
             </li>
         </ul>
         <div class="page-btn mt-0">
-            <a href="product-list.html" class="btn btn-secondary"><i data-feather="arrow-left" class="me-2"></i>Back to Product</a>
+            <a class="btn btn-secondary" href="/admin/product-list"><i data-feather="arrow-left" class="me-2"></i>Back to Product</a>
         </div>
     </div>
-    <form action="add-product.html" class="add-product-form">
+
+    <EditForm Model="ProductModel" OnValidSubmit="HandleAdd" class="add-product-form">
+        <DataAnnotationsValidator />
         <div class="add-product">
-            <div class="accordions-items-seperate" id="accordionSpacingExample">
+            <div class="accordions-items-separate" id="accordionSpacingExample">
                 <div class="accordion-item border mb-4">
                     <h2 class="accordion-header" id="headingSpacingOne">
                         <div class="accordion-button collapsed bg-white" data-bs-toggle="collapse" data-bs-target="#SpacingOne" aria-expanded="true" aria-controls="SpacingOne">
@@ -34,73 +45,24 @@
                     </h2>
                     <div id="SpacingOne" class="accordion-collapse collapse show" aria-labelledby="headingSpacingOne">
                         <div class="accordion-body border-top">
-                            <div class="row">
-                                <div class="col-sm-6 col-12">
-                                    <div class="mb-3">
-                                        <label class="form-label">Store<span class="text-danger ms-1">*</span></label>
-                                        <select class="select">
-                                            <option>Select</option>
-                                            <option>Electro Mart</option>
-                                            <option>Quantum Gadgets</option>
-                                            <option>Gadget World</option>
-                                            <option>Volt Vault</option>
-                                            <option>Elite Retail</option>
-                                            <option>Prime Mart</option>
-                                            <option>NeoTech Store</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6 col-12">
-                                    <div class="mb-3">
-                                        <label class="form-label">Warehouse<span class="text-danger ms-1">*</span></label>
-                                        <select class="select">
-                                            <option>Select</option>
-                                            <option>Lavish Warehouse</option>
-                                            <option>Quaint Warehouse</option>
-                                            <option>Traditional Warehouse</option>
-                                            <option>Cool Warehouse</option>
-                                            <option>Overflow Warehouse</option>
-                                            <option>Nova Storage Hub</option>
-                                            <option>Retail Supply Hub</option>
-                                            <option>EdgeWare Solutions</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
+                            
                             <div class="row">
                                 <div class="col-sm-6 col-12">
                                     <div class="mb-3">
                                         <label class="form-label">Product Name<span class="text-danger ms-1">*</span></label>
-                                        <input type="text" class="form-control">
+                                        <InputText class="form-control" @bind-Value="ProductModel.Name" />
+                                        <ValidationMessage For="() => ProductModel.Name" />
                                     </div>
                                 </div>
-                                <div class="col-sm-6 col-12">
-                                    <div class="mb-3">
-                                        <label class="form-label">Slug<span class="text-danger ms-1">*</span></label>
-                                        <input type="text" class="form-control">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
+                                
                                 <div class="col-sm-6 col-12">
                                     <div class="mb-3 list position-relative">
-                                        <label class="form-label">SKU<span class="text-danger ms-1">*</span></label>
-                                        <input type="text" class="form-control list">
-                                        <button type="submit" class="btn btn-primaryadd">
-                                            Generate
-                                        </button>
+                                        <label class="form-label">SKU/Batch No.<span class="text-danger ms-1">*</span></label>
+                                        <InputText class="form-control list" @bind-Value="ProductModel.SKU" />
+                                        <ValidationMessage For="() => ProductModel.SKU" />
+                                        <button type="button" class="btn btn-primaryadd mt-2" @onclick="GenerateSku">Generate</button>
                                     </div>
-                                </div>
-                                <div class="col-sm-6 col-12">
-                                    <div class="mb-3">
-                                        <label class="form-label">Selling Type<span class="text-danger ms-1">*</span></label>
-                                        <select class="select">
-                                            <option>Select</option>
-                                            <option>Online</option>
-                                            <option>POS</option>
-                                        </select>
-                                    </div>
-                                </div>
+                                </div> 
                             </div>
                             <div class="addservice-info">
                                 <div class="row">
@@ -108,122 +70,44 @@
                                         <div class="mb-3">
                                             <div class="add-newplus">
                                                 <label class="form-label">Category<span class="text-danger ms-1">*</span></label>
-                                                <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#add-product-category">
+                                                <a href="/admin/category-list" data-bs-toggle="modal" data-bs-target="#add-product-category">
                                                     <i data-feather="plus-circle" class="plus-down-add"></i><span>
                                                         Add
                                                         New
                                                     </span>
                                                 </a>
                                             </div>
-                                            <select class="select">
-                                                <option>Select</option>
-                                                <option>Computers</option>
-                                                <option>Electronics</option>
-                                                <option>Shoe</option>
-                                                <option>Cosmetics</option>
-                                                <option>Groceries</option>
-                                                <option>Furniture</option>
-                                                <option>Bags</option>
-                                                <option>Phone</option>
+                                            <select class="form-control" @onchange="OnCategoryChanged">
+                                                <option value="">Select</option>
+                                                @foreach (var c in Categories)
+                                                {
+                                                    <option value="@c.Id">@c.Name</option>
+                                                }
                                             </select>
                                         </div>
                                     </div>
                                     <div class="col-sm-6 col-12">
                                         <div class="mb-3">
                                             <label class="form-label">Sub Category<span class="text-danger ms-1">*</span></label>
-                                            <select class="select">
-                                                <option>Select</option>
-                                                <option>Laptop</option>
-                                                <option>Desktop</option>
-                                                <option>Sneakers</option>
-                                                <option>Formals</option>
-                                                <option>Wearables</option>
-                                                <option>Speakers</option>
-                                                <option>Handbags</option>
-                                                <option>Travel</option>
-                                                <option>Sofa</option>
+                                            <select class="form-control" @onchange="OnSubCategoryChanged">
+                                                <option value="">Select</option>
+                                                @foreach (var s in SubCategories)
+                                                {
+                                                    <option value="@s.Id">@s.Name</option>
+                                                }
                                             </select>
                                         </div>
                                     </div>
+                                
                                 </div>
                             </div>
-                            <div class="add-product-new">
-                                <div class="row">
-                                    <div class="col-sm-6 col-12">
-                                        <div class="mb-3">
-                                            <div class="add-newplus">
-                                                <label class="form-label">Brand<span class="text-danger ms-1">*</span></label>
-                                            </div>
-                                            <select class="select">
-                                                <option>Select</option>
-                                                <option>Lenevo</option>
-                                                <option>Beats</option>
-                                                <option>Nike</option>
-                                                <option>Apple</option>
-                                                <option>Amazon</option>
-                                                <option>Woodmart</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-6 col-12">
-                                        <div class="mb-3">
-                                            <div class="add-newplus">
-                                                <label class="form-label">Unit<span class="text-danger ms-1">*</span></label>
-                                            </div>
-                                            <select class="select">
-                                                <option>Select</option>
-                                                <option>Kg</option>
-                                                <option>Pcs</option>
-                                                <option>L</option>
-                                                <option>dz</option>
-                                                <option>bx</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-sm-6">
-                                    <div class="mb-3">
-                                        <div class="add-newplus">
-                                            <label class="form-label">Barcode Symbology<span class="text-danger ms-1">*</span></label>
-                                        </div>
-                                        <select class="select">
-                                            <option>Select</option>
-                                            <option>Code 128</option>
-                                            <option>Code 39</option>
-                                            <option>UPC-A</option>
-                                            <option>UPC_E</option>
-                                            <option>EAN-8</option>
-                                            <option>EAN-13</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 col-sm-6 col-12">
-                                    <div class="mb-3 list position-relative">
-                                        <label class="form-label">Item Barcode<span class="text-danger ms-1">*</span></label>
-                                        <input type="text" class="form-control list">
-                                        <button type="submit" class="btn btn-primaryadd">
-                                            Generate
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Editor -->
-                            <div class="col-lg-12">
-                                <div class="summer-description-box">
-                                    <label class="form-label">Description</label>
-                                    <div class="editor pages-editor"></div>
-                                    <p class="fs-14 mt-1">Maximum 60 Words</p>
-                                </div>
-                            </div>
-                            <!-- /Editor -->
+                            
                         </div>
                     </div>
                 </div>
                 <div class="accordion-item border mb-4">
                     <h2 class="accordion-header" id="headingSpacingTwo">
-                        <div class="accordion-button collapsed bg-white" data-bs-toggle="collapse" data-bs-target="#SpacingTwo" aria-expanded="true" aria-controls="SpacingTwo">
+                        <div class="accordion-button collapsed bg-white" data-bs-toggle="collapse" data-bs-target="#SpacingTwo" aria-expanded="true" aria-controls="#SpacingTwo">
                             <div class="d-flex align-items-center justify-content-between flex-fill">
                                 <h5 class="d-flex align-items-center"><i data-feather="life-buoy" class="text-primary me-2"></i><span>Pricing & Stocks</span></h5>
                             </div>
@@ -232,23 +116,17 @@
                     <div id="SpacingTwo" class="accordion-collapse collapse show" aria-labelledby="headingSpacingTwo">
                         <div class="accordion-body border-top">
                             <div class="mb-3s">
-                                <label class="form-label">Product Type<span class="text-danger ms-1">*</span></label>
+                                
                                 <div class="single-pill-product mb-3">
                                     <ul class="nav nav-pills" id="pills-tab1" role="tablist">
                                         <li class="nav-item" role="presentation">
                                             <span class="custom_radio me-4 mb-0 active" id="pills-home-tab" data-bs-toggle="pill"
                                                   data-bs-target="#pills-home" role="tab" aria-controls="pills-home" aria-selected="true">
                                                 <input type="radio" class="form-control" name="payment">
-                                                <span class="checkmark"></span> Single Product
+                                                <span class="checkmark"></span> 
                                             </span>
                                         </li>
-                                        <li class="nav-item" role="presentation">
-                                            <span class="custom_radio me-2 mb-0" id="pills-profile-tab" data-bs-toggle="pill"
-                                                  data-bs-target="#pills-profile" role="tab" aria-controls="pills-profile" aria-selected="false">
-                                                <input type="radio" class="form-control" name="sign">
-                                                <span class="checkmark"></span> Variable Product
-                                            </span>
-                                        </li>
+                                        
                                     </ul>
                                 </div>
                             </div>
@@ -257,218 +135,44 @@
                                      aria-labelledby="pills-home-tab">
                                     <div class="single-product">
                                         <div class="row">
-                                            <div class="col-lg-4 col-sm-6 col-12">
+                                            <div class="col-sm-6 col-12">
                                                 <div class="mb-3">
                                                     <label class="form-label">Quantity<span class="text-danger ms-1">*</span></label>
-                                                    <input type="text" class="form-control">
+                                                    <InputNumber class="form-control" @bind-Value="ProductModel.Quantity" />
+                                                    <ValidationMessage For="() => ProductModel.Quantity" />
                                                 </div>
                                             </div>
-                                            <div class="col-lg-4 col-sm-6 col-12">
+                                            <div class="col-sm-6 col-12">
                                                 <div class="mb-3">
                                                     <label class="form-label">Price<span class="text-danger ms-1">*</span></label>
-                                                    <input type="text" class="form-control">
+                                                    <InputNumber class="form-control" @bind-Value="ProductModel.Price" />
+                                                    <ValidationMessage For="() => ProductModel.Price" />
                                                 </div>
                                             </div>
-                                            <div class="col-lg-4 col-sm-6 col-12">
+                                            <div class="col-sm-6 col-12">
                                                 <div class="mb-3">
-                                                    <label class="form-label">Tax Type<span class="text-danger ms-1">*</span></label>
-                                                    <select class="select">
+                                                    <label class="form-label">Unit<span class="text-danger ms-1">*</span></label>
+                                                    <select class="form-control" @bind="ProductModel.Unit">
                                                         <option>Select</option>
-                                                        <option>Exclusive</option>
-                                                        <option>Inclusive</option>
+                                                        <option>Kg</option>
+                                                        <option>Pcs</option>
+                                                        <option>L</option>
+                                                        <option>dz</option>
+                                                        <option>bx</option>
                                                     </select>
                                                 </div>
                                             </div>
-                                            <div class="col-lg-4 col-sm-6 col-12">
+                                            
+                                            <div class="col-sm-6 col-12">
                                                 <div class="mb-3">
-                                                    <label class="form-label">Tax<span class="text-danger ms-1">*</span></label>
-                                                    <select class="select">
-                                                        <option>Select</option>
-                                                        <option>IGST (8%)</option>
-                                                        <option>GST (5%)</option>
-                                                        <option>SGST (4%)</option>
-                                                        <option>CGST (16%)</option>
-                                                        <option>Gst 18%</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-lg-4 col-sm-6 col-12">
-                                                <div class="mb-3">
-                                                    <label class="form-label">Discount Type<span class="text-danger ms-1">*</span></label>
-                                                    <select class="select">
-                                                        <option>Select</option>
-                                                        <option>Percentage</option>
-                                                        <option>Fixed</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-4 col-sm-6 col-12">
-                                                <div class="mb-3">
-                                                    <label class="form-label">Discount Value<span class="text-danger ms-1">*</span></label>
-                                                    <input class="form-control" type="text">
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-4 col-sm-6 col-12">
-                                                <div class="mb-3">
-                                                    <label class="form-label">Quantity Alert<span class="text-danger ms-1">*</span></label>
-                                                    <input type="text" class="form-control">
+                                                    <label class="form-label">Re-Order Quantity Alert<span class="text-danger ms-1">*</span></label>
+                                                    <InputNumber class="form-control" @bind-Value="ProductModel.Quantity" />
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="tab-pane fade" id="pills-profile" role="tabpanel"
-                                     aria-labelledby="pills-profile-tab">
-                                    <div class="row select-color-add">
-                                        <div class="col-lg-6 col-sm-6 col-12">
-                                            <div class="mb-3">
-                                                <label class="form-label">Variant Attribute <span class="text-danger ms-1">*</span></label>
-                                                <div class="row">
-                                                    <div class="col-lg-10 col-sm-10 col-10">
-                                                        <select class="form-control variant-select select-option select" id="colorSelect">
-                                                            <option>Choose</option>
-                                                            <option>Color</option>
-                                                            <option value="red">Red</option>
-                                                            <option value="black">Black</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-lg-2 col-sm-2 col-2 ps-0">
-                                                        <div class="add-icon tab">
-                                                            <a class="btn btn-filter" data-bs-toggle="modal" data-bs-target="#add-product-category"><i class="feather feather-plus-circle"></i></a>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="selected-hide-color" id="input-show">
-                                                <label class="form-label">Variant Attribute <span class="text-danger ms-1">*</span></label>
-                                                <div class="row align-items-center">
-                                                    <div class="col-lg-10 col-sm-10 col-10">
-                                                        <div class="mb-3">
-                                                            <input class="input-tags form-control" id="inputBox" type="text" data-role="tagsinput" name="specialist" value="red, black">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-lg-2 col-sm-2 col-2 ps-0">
-                                                        <div class="mb-3 ">
-                                                            <a href="javascript:void(0);" class="remove-color"><i class="far fa-trash-alt"></i></a>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="modal-body-table border" id="variant-table">
-                                        <div class="table-responsive">
-                                            <table class="table border">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Variantion</th>
-                                                        <th>Variant Value</th>
-                                                        <th>SKU</th>
-                                                        <th>Quantity</th>
-                                                        <th>Price</th>
-                                                        <th class="no-sort"></th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr>
-                                                        <td>
-                                                            <div class="add-product">
-                                                                <input type="text" class="form-control" value="color">
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="add-product">
-                                                                <input type="text" class="form-control" value="red">
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="add-product">
-                                                                <input type="text" class="form-control" value="1234">
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="product-quantity">
-                                                                <span class="quantity-btn"><i data-feather="minus-circle" class="feather-search"></i></span>
-                                                                <input type="text" class="quntity-input form-control" value="2">
-                                                                <span class="quantity-btn">+<i data-feather="plus-circle" class="plus-circle"></i></span>
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="add-product">
-                                                                <input type="text" class="form-control" value="50000">
-                                                            </div>
-                                                        </td>
-                                                        <td class="action-table-data">
-                                                            <div class="edit-delete-action">
-                                                                <div class="input-block add-lists">
-                                                                    <label class="checkboxs">
-                                                                        <input type="checkbox" checked>
-                                                                        <span class="checkmarks"></span>
-                                                                    </label>
-                                                                </div>
-                                                                <a class="me-2 p-2" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#add-variation">
-                                                                    <i data-feather="plus" class="feather-edit"></i>
-                                                                </a>
-                                                                <a data-bs-toggle="modal" data-bs-target="#delete-modal" class="p-2" href="javascript:void(0);">
-                                                                    <i data-feather="trash-2" class="feather-trash-2"></i>
-                                                                </a>
-                                                            </div>
-
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>
-                                                            <div class="add-product">
-                                                                <input type="text" class="form-control" value="color">
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="add-product">
-                                                                <input type="text" class="form-control" value="black">
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="add-product">
-                                                                <input type="text" class="form-control" value="2345">
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="product-quantity">
-                                                                <span class="quantity-btn"><i data-feather="minus-circle" class="feather-search"></i></span>
-                                                                <input type="text" class="quntity-input form-control" value="3">
-                                                                <span class="quantity-btn">+<i data-feather="plus-circle" class="plus-circle"></i></span>
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="add-product">
-                                                                <input type="text" class="form-control" value="50000">
-                                                            </div>
-                                                        </td>
-                                                        <td class="action-table-data">
-                                                            <div class="edit-delete-action">
-                                                                <div class="input-block add-lists">
-                                                                    <label class="checkboxs">
-                                                                        <input type="checkbox" checked>
-                                                                        <span class="checkmarks"></span>
-                                                                    </label>
-                                                                </div>
-                                                                <a class="me-2 p-2" href="#" data-bs-toggle="modal" data-bs-target="#add-variation">
-                                                                    <i data-feather="plus" class="feather-edit"></i>
-                                                                </a>
-                                                                <a data-bs-toggle="modal" data-bs-target="#delete-modal" class="p-2" href="javascript:void(0);">
-                                                                    <i data-feather="trash-2" class="feather-trash-2"></i>
-                                                                </a>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-
-                                </div>
+                                
                             </div>
                         </div>
                     </div>
@@ -488,7 +192,7 @@
                                     <div class="add-choosen">
                                         <div class="mb-3">
                                             <div class="image-upload image-upload-two">
-                                                <input type="file">
+                                                <InputFile OnChange="OnInputFileChanged" />
                                                 <div class="image-uploads">
                                                     <i data-feather="plus-circle" class="plus-down-add me-0"></i>
                                                     <h4>Add Images</h4>
@@ -496,14 +200,16 @@
                                             </div>
                                         </div>
                                         <div class="phone-img">
-                                            <img src="assets/img/products/phone-add-2.png" alt="image">
-                                            <a href="javascript:void(0);"><i data-feather="x" class="x-square-add remove-product"></i></a>
-                                        </div>
-
-                                        <div class="phone-img">
-                                            <img src="assets/img/products/phone-add-1.png" alt="image">
-                                            <a href="javascript:void(0);"><i data-feather="x" class="x-square-add remove-product"></i></a>
-                                        </div>
+                                            @if (!string.IsNullOrEmpty(PrimaryPreviewUrl))
+                                            {
+                                                <img src="@PrimaryPreviewUrl" alt="image">
+                                            }
+                                            else
+                                            {
+                                                <img src="assets/img/products/phone-add-2.png" alt="image">
+                                            }
+                                            <a href="javascript:void(0);"><i data-feather="x" class="x-square-add remove-product" @onclick="ClearPrimaryImage"></i></a>
+                                        </div>  
                                     </div>
                                 </div>
                             </div>
@@ -520,42 +226,7 @@
                     </h2>
                     <div id="SpacingFour" class="accordion-collapse collapse show" aria-labelledby="headingSpacingFour">
                         <div class="accordion-body border-top">
-                            <div>
-                                <div class="p-3 bg-light rounded d-flex align-items-center border mb-3">
-                                    <div class=" d-flex align-items-center">
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="checkbox" id="warranties" value="option1">
-                                            <label class="form-check-label" for="warranties">Warranties</label>
-                                        </div>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="checkbox" id="manufacturer" value="option2">
-                                            <label class="form-check-label" for="manufacturer">Manufacturer</label>
-                                        </div>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="checkbox" id="expiry" value="option2">
-                                            <label class="form-check-label" for="expiry">Expiry</label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-sm-6 col-12">
-                                        <div class="mb-3">
-                                            <label class="form-label">Warranty<span class="text-danger ms-1">*</span></label>
-                                            <select class="select">
-                                                <option>Select</option>
-                                                <option>Replacement Warranty</option>
-                                                <option>On-Site Warranty</option>
-                                                <option>Accidental Protection Plan</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-6 col-12">
-                                        <div class="mb-3 add-product">
-                                            <label class="form-label">Manufacturer<span class="text-danger ms-1">*</span></label>
-                                            <input type="text" class="form-control">
-                                        </div>
-                                    </div>
-                                </div>
+                            <div> 
                                 <div class="row">
                                     <div class="col-sm-6 col-12">
                                         <div class="mb-3">
@@ -563,7 +234,7 @@
 
                                             <div class="input-groupicon calender-input">
                                                 <i data-feather="calendar" class="info-img"></i>
-                                                <input type="text" class="datetimepicker form-control" placeholder="dd/mm/yyyy">
+                                                <InputDate class="form-control" @bind-Value="ProductModel.ManufacturedDate" />
                                             </div>
                                         </div>
                                     </div>
@@ -573,7 +244,7 @@
 
                                             <div class="input-groupicon calender-input">
                                                 <i data-feather="calendar" class="info-img"></i>
-                                                <input type="text" class="datetimepicker form-control" placeholder="dd/mm/yyyy">
+                                                <InputDate class="form-control" @bind-Value="ProductModel.ExpiryDate" />
                                             </div>
                                         </div>
                                     </div>
@@ -586,14 +257,240 @@
         </div>
         <div class="col-lg-12">
             <div class="d-flex align-items-center justify-content-end mb-4">
-                <button type="button" class="btn btn-secondary me-2">Cancel</button>
+                <button type="button" class="btn btn-secondary me-2" @onclick="Cancel">Cancel</button>
                 <button type="submit" class="btn btn-primary">Add Product</button>
             </div>
         </div>
-    </form>
+    </EditForm>
 </div>
 <AddCategoryModal />
 <DeleteModal />
 @code {
+    private ProductDto ProductModel { get; set; } = new ProductDto();
+    private List<CategoryDto> Categories { get; set; } = new();
+    private List<SubCategoryDto> SubCategories { get; set; } = new();
+    private string Category { get; set; } = string.Empty;
+    private string SubCategory { get; set; } = string.Empty;
+    private string PrimaryImage { get; set; } = string.Empty; // stored URL returned from server
+    private string PrimaryPreviewUrl { get; set; } = string.Empty; // data url for preview
 
-}
+    private bool IsLoading { get; set; }
+    private bool isSubmitting { get; set; }
+
+    private const long MaxFileBytes = 5 * 1024 * 1024; // 5 MB
+
+    protected override async Task OnInitializedAsync()
+    {
+       await LoadFiltersAsync();
+    }
+    private async Task HandleAdd()
+    {
+        if (isSubmitting) return;
+        isSubmitting = true;
+        try
+        {
+            // ProductModel is bound to form inputs and validated by EditForm
+            if (string.IsNullOrWhiteSpace(ProductModel.Name) || string.IsNullOrWhiteSpace(ProductModel.SKU))
+            {
+                ToastService.ShowError("Please provide Name and SKU");
+                return;
+            }
+            ProductModel.ImageUrl = PrimaryImage ?? string.Empty;
+
+            var res = await ApiClient.PostAsync<ProductDto>("/api/products", ProductModel);
+            if (res.Success)
+            {
+                await ShowToastAsync("Product created successfully", "success");
+                ResetForm();
+                Navigation.NavigateTo("/admin/product-list");
+            }
+            else
+            {
+                await ShowToastAsync(res.Message ?? "Failed to create product", "error");
+            }
+        }
+        catch (Exception ex)
+        {
+            await ShowToastAsync("Error: " + ex.Message, "error");
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void GenerateSku()
+    {
+        var rnd = new Random();
+        ProductModel.SKU = $"BATCH-{DateTime.UtcNow:yyyyMMddHHmmss}-{rnd.Next(1000, 9999)}";
+    }
+
+    // Use Blazor ToastService instead of JS toastr
+    private Task ShowToastAsync(string message, string type = "info")
+    {
+        switch (type)
+        {
+            case "success":
+                ToastService.ShowSuccess(message);
+                break;
+            case "error":
+                ToastService.ShowError(message);
+                break;
+            case "warning":
+                ToastService.ShowWarning(message);
+                break;
+            default:
+                ToastService.ShowInfo(message);
+                break;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private async Task OnFileSelected(ChangeEventArgs e)
+    {
+         // Recommend using InputFile; notify user
+         ToastService.ShowInfo("Please use the provided image upload widget (Drag & Drop) or use the Choose Image button.");
+         await Task.CompletedTask;
+    }
+
+    private async Task UploadAndPreview(IBrowserFile file)
+    {
+        if (file == null) return;
+        if (file.Size > MaxFileBytes)
+        {
+            ToastService.ShowError("File too large. Max 5 MB.");
+            return;
+        }
+
+        var allowed = new[] { "image/jpeg", "image/png", "image/webp" };
+        if (!allowed.Contains(file.ContentType))
+        {
+            ToastService.ShowError("Invalid file type. Only JPG, PNG, WEBP allowed.");
+            return;
+        }
+
+        try
+        {
+            using var ms = new MemoryStream();
+            await file.OpenReadStream(MaxFileBytes).CopyToAsync(ms);
+            var bytes = ms.ToArray();
+            var base64 = Convert.ToBase64String(bytes);
+            PrimaryPreviewUrl = $"data:{file.ContentType};base64,{base64}";
+
+            PrimaryImage = PrimaryPreviewUrl;
+
+            ToastService.ShowSuccess("Image loaded and will be saved with product.");
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError("Upload error: " + ex.Message);
+        }
+    }
+
+    // Helper for file input via InputFile component if used in future
+    private async Task OnInputFileChanged(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        await UploadAndPreview(file);
+    }
+
+    private async Task OnCategoryChanged(ChangeEventArgs e)
+    {
+        Category = e?.Value?.ToString() ?? string.Empty;
+        if (Guid.TryParse(Category, out var id))
+        {
+             ProductModel.CategoryId = id;
+             // fetch subcategories for selected category
+             // Some endpoints return paged data in `data` as { items: [...], total, page, pageSize }
+             // Try to read as PagedResult<SubCategoryDto> first and fall back to List<SubCategoryDto>
+             var pagedRes = await ApiClient.GetAsync<PagedResult<SubCategoryDto>>($"/api/subcategories?categoryId={id}");
+             if (pagedRes.Success && pagedRes.Data != null && pagedRes.Data.Items != null)
+             {
+                 SubCategories = pagedRes.Data.Items;
+             }
+             else
+             {
+                 // Fallback: try raw list
+                 var listRes = await ApiClient.GetAsync<List<SubCategoryDto>>($"/api/subcategories?categoryId={id}");
+                 if (listRes.Success && listRes.Data != null)
+                 {
+                     SubCategories = listRes.Data;
+                 }
+                 else
+                 {
+                     SubCategories = new List<SubCategoryDto>();
+                 }
+             }
+         }
+         else
+         {
+             ProductModel.CategoryId = Guid.Empty;
+             SubCategories = new List<SubCategoryDto>();
+         }
+    }
+
+    private Task OnSubCategoryChanged(ChangeEventArgs e)
+    {
+        SubCategory = e?.Value?.ToString() ?? string.Empty;
+        if (Guid.TryParse(SubCategory, out var id))
+        {
+             ProductModel.SubCategoryId = id;
+        }
+        else
+        {
+             ProductModel.SubCategoryId = Guid.Empty;
+        }
+        return Task.CompletedTask;
+    }
+
+    private void ClearPrimaryImage()
+    {
+        PrimaryImage = string.Empty;
+        PrimaryPreviewUrl = string.Empty;
+    }
+
+    private void ResetForm()
+    {
+        ProductModel = new ProductDto();
+        Category = string.Empty;
+        SubCategory = string.Empty;
+        PrimaryImage = string.Empty;
+        PrimaryPreviewUrl = string.Empty;
+    }
+
+    private async Task RefreshForm()
+    {
+         IsLoading = true;
+         try
+         {
+             ResetForm();
+             await LoadFiltersAsync();
+         }
+         finally { IsLoading = false; }
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/admin/product-list");
+    }
+
+    private async Task LoadFiltersAsync()
+    {
+         IsLoading = true;
+         try
+         {
+             var cres = await ApiClient.GetAsync<List<CategoryDto>>("/api/categories");
+             if (cres.Success && cres.Data != null) Categories = cres.Data;
+             else Categories = new List<CategoryDto>();
+
+             SubCategories = new List<SubCategoryDto>();
+         }
+         catch
+         {
+             Categories = new List<CategoryDto>();
+             SubCategories = new List<SubCategoryDto>();
+         }
+         finally { IsLoading = false; }
+     }
+ }

@@ -17,6 +17,10 @@ public interface IEvelynPhilApiHttpClient
     Task<EvelynPhilApiResponse<T>> DeleteAsync<T>(string endpoint);
     Task<EvelynPhilApiResponse> PostAsync(string endpoint, object? data = null);
     Task<EvelynPhilApiResponse> DeleteAsync(string endpoint);
+
+    // Added for multipart uploads (returns raw HttpResponseMessage so caller can read streams/content)
+    Task<HttpResponseMessage> PostMultipartAsync(string endpoint, HttpContent content);
+
     void SetAuthToken(string token);
     Task SetAuthTokenAsync(string token, bool rememberMe);
     Task<string?> GetRememberMeEmailAsync();
@@ -130,6 +134,38 @@ public class EvelynPhilApiHttpClient : IEvelynPhilApiHttpClient
         {
             _logger.LogError(ex, $"Error calling POST {endpoint}");
             return EvelynPhilApiResponse<T>.ErrorResponse($"Error: {ex.Message}");
+        }
+    }
+
+    // Multipart POST implementation (new)
+    public async Task<HttpResponseMessage> PostMultipartAsync(string endpoint, HttpContent content)
+    {
+        try
+        {
+            await RestoreTokenFromStorage();
+            AddAuthHeader();
+
+            var fullUrl = _httpClient.BaseAddress?.ToString().TrimEnd('/') + "/" + endpoint.TrimStart('/');
+            _logger.LogInformation($"🔗 MULTIPART REQUEST URL: {fullUrl}");
+
+            var response = await _httpClient.PostAsync(fullUrl, content);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                var refreshed = await TryRefreshTokenAsync();
+                if (refreshed)
+                {
+                    AddAuthHeader();
+                    response = await _httpClient.PostAsync(fullUrl, content);
+                }
+            }
+
+            return response;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error calling PostMultipartAsync {endpoint}");
+            throw;
         }
     }
 

@@ -20,6 +20,9 @@ namespace EvelynStores.Infrastructure.Data
         public DbSet<User> Users { get; set; }
         public DbSet<PasswordResetOtp> PasswordResetOtps { get; set; }
         public DbSet<Unit> Units { get; set; }
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<SubCategory> SubCategories { get; set; }
+        public DbSet<Product> Products { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -32,6 +35,23 @@ namespace EvelynStores.Infrastructure.Data
                 entity.Property(u => u.Name).IsRequired().HasMaxLength(100);
                 entity.Property(u => u.Email).IsRequired().HasMaxLength(256);
                 entity.Property(u => u.PasswordHash).IsRequired();
+            });
+
+            modelBuilder.Entity<Product>(entity =>
+            {
+                entity.HasKey(p => p.Id);
+                entity.Property(p => p.Name).IsRequired().HasMaxLength(500);
+                entity.Property(p => p.SKU).HasMaxLength(100);
+                entity.Property(p => p.ImageUrl).HasColumnType("text");
+                entity.Property(p => p.CreatedAt).IsRequired();
+            });
+
+            modelBuilder.Entity<Category>(entity =>
+            {
+                entity.HasKey(c => c.Id);
+                entity.Property(c => c.Name).IsRequired().HasMaxLength(200);
+                entity.Property(c => c.Slug).HasMaxLength(200);
+                entity.Property(c => c.CreatedAt).IsRequired();
             });
 
             modelBuilder.Entity<PasswordResetOtp>(entity =>
@@ -51,6 +71,17 @@ namespace EvelynStores.Infrastructure.Data
                 entity.Property(u => u.Name).IsRequired().HasMaxLength(200);
                 entity.Property(u => u.ShortName).HasMaxLength(50);
                 entity.Property(u => u.CreatedAt).IsRequired();
+            });
+
+            modelBuilder.Entity<SubCategory>(entity =>
+            {
+                entity.HasKey(s => s.Id);
+                entity.Property(s => s.Name).IsRequired().HasMaxLength(200);
+                entity.Property(s => s.Slug).HasMaxLength(200);
+                entity.Property(s => s.Code).HasMaxLength(100);
+                entity.Property(s => s.CreatedAt).IsRequired();
+                entity.HasIndex(s => s.Slug);
+                entity.HasOne<Category>().WithMany().HasForeignKey(s => s.CategoryId).OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

@@ -63,6 +63,12 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddSingleton(sp =>
+{
+    var baseUrl = builder.Configuration["ApiBaseUrl"] ?? "https://localhost:7001";
+    return new HttpClient { BaseAddress = new Uri(baseUrl) };
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -72,6 +78,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Serve static files (for uploaded images under wwwroot/uploads)
+app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();
