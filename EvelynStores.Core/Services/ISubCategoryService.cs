@@ -4,6 +4,8 @@ namespace EvelynStores.Core.Services;
 
 public interface ISubCategoryService
 {
+    // Return all subcategories (non-paged)
+    Task<List<SubCategoryDto>> GetAllAsync();
     Task<PagedResponse<SubCategoryDto>> GetAllAsync(string? searchTerm = null, string status = "All", Guid? categoryId = null, int page = 1, int pageSize = 20);
     Task<SubCategoryDto?> GetByIdAsync(Guid id);
     Task<SubCategoryDto> CreateAsync(SubCategoryDto dto);

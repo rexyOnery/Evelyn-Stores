@@ -19,4 +19,5 @@ public class Product
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? ManufacturedDate { get; set; }
     public DateTime? ExpiryDate { get; set; }
+    public int ReOrderLevel { get; set; }
 }

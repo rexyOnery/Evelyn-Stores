@@ -1,4 +1,4 @@
-﻿@page "/admin/add-product"
+﻿@page "/admin/edit-product/{ProductId:guid}"
 @using EvelynStores.Core.DTOs
 @using System.Text.Json
 @using System.Net.Http.Headers
@@ -8,14 +8,14 @@
 @inject NavigationManager Navigation
 @inject EvelynStores.Web.Services.ToastService ToastService
 
-<PageTitle>Add Product</PageTitle>
+<PageTitle>Edit Product</PageTitle>
 
 <div class="content">
     <div class="page-header">
         <div class="add-item d-flex">
             <div class="page-title">
-                <h4 class="fw-bold">Create Product</h4>
-                <h6>Create new product</h6>
+                <h4 class="fw-bold">Edit Product</h4>
+                <h6>Edit existing product</h6>
             </div>
         </div>
         <ul class="table-top-head">
@@ -31,7 +31,7 @@
         </div>
     </div>
 
-    <EditForm Model="ProductModel" OnValidSubmit="HandleAdd" class="add-product-form">
+    <EditForm Model="ProductModel" OnValidSubmit="HandleEdit" class="add-product-form">
         <DataAnnotationsValidator />
         <div class="add-product">
             <div class="accordions-items-separate" id="accordionSpacingExample">
@@ -59,11 +59,11 @@
                                                     </span>
                                                 </a>
                                             </div>
-                                            <select class="form-control" @onchange="OnCategoryChanged">
+                                            <select class="form-control" @onchange="OnCategoryChanged" value="@Category">
                                                 <option value="">Select</option>
                                                 @foreach (var c in Categories)
                                                 {
-                                                    <option value="@c.Id">@c.Name</option>
+                                                    <option value="@c.Id" selected="@((ProductModel.CategoryId==c.Id))">@c.Name</option>
                                                 }
                                             </select>
                                         </div>
@@ -71,11 +71,11 @@
                                     <div class="col-sm-6 col-12">
                                         <div class="mb-3">
                                             <label class="form-label">Sub Category<span class="text-danger ms-1">*</span></label>
-                                            <select class="form-control" @onchange="OnSubCategoryChanged">
+                                            <select class="form-control" @onchange="OnSubCategoryChanged" value="@SubCategory">
                                                 <option value="">Select</option>
                                                 @foreach (var s in SubCategories)
                                                 {
-                                                    <option value="@s.Id">@s.Name</option>
+                                                    <option value="@s.Id" selected="@((ProductModel.SubCategoryId==s.Id))">@s.Name</option>
                                                 }
                                             </select>
                                         </div>
@@ -92,7 +92,7 @@
                                         <ValidationMessage For="() => ProductModel.Name" />
                                     </div>
                                 </div>
-                                
+
                                 <div class="col-sm-6 col-12">
                                     <div class="mb-3 list position-relative">
                                         <label class="form-label">SKU/Batch No.<span class="text-danger ms-1">*</span></label>
@@ -100,7 +100,7 @@
                                         <ValidationMessage For="() => ProductModel.SKU" />
                                         <button type="button" class="btn btn-primaryadd mt-2" @onclick="GenerateSku">Generate</button>
                                     </div>
-                                </div> 
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -116,17 +116,17 @@
                     <div id="SpacingTwo" class="accordion-collapse collapse show" aria-labelledby="headingSpacingTwo">
                         <div class="accordion-body border-top">
                             <div class="mb-3s">
-                                
+
                                 <div class="single-pill-product mb-3">
                                     <ul class="nav nav-pills" id="pills-tab1" role="tablist">
                                         <li class="nav-item" role="presentation">
                                             <span class="custom_radio me-4 mb-0 active" id="pills-home-tab" data-bs-toggle="pill"
                                                   data-bs-target="#pills-home" role="tab" aria-controls="pills-home" aria-selected="true">
                                                 <input type="radio" class="form-control" name="payment">
-                                                <span class="checkmark"></span> 
+                                                <span class="checkmark"></span>
                                             </span>
                                         </li>
-                                        
+
                                     </ul>
                                 </div>
                             </div>
@@ -162,7 +162,7 @@
                                                     </select>
                                                 </div>
                                             </div>
-                                            
+
                                             <div class="col-sm-6 col-12">
                                                 <div class="mb-3">
                                                     <label class="form-label">Re-Order Quantity Alert<span class="text-danger ms-1">*</span></label>
@@ -172,7 +172,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                
+
                             </div>
                         </div>
                     </div>
@@ -209,7 +209,7 @@
                                                 <img src="assets/img/products/phone-add-2.png" alt="image">
                                             }
                                             <a href="javascript:void(0);"><i data-feather="x" class="x-square-add remove-product" @onclick="ClearPrimaryImage"></i></a>
-                                        </div>  
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -226,7 +226,7 @@
                     </h2>
                     <div id="SpacingFour" class="accordion-collapse collapse show" aria-labelledby="headingSpacingFour">
                         <div class="accordion-body border-top">
-                            <div> 
+                            <div>
                                 <div class="row">
                                     <div class="col-sm-6 col-12">
                                         <div class="mb-3">
@@ -258,14 +258,20 @@
         <div class="col-lg-12">
             <div class="d-flex align-items-center justify-content-end mb-4">
                 <button type="button" class="btn btn-secondary me-2" @onclick="Cancel">Cancel</button>
-                <button type="submit" class="btn btn-primary">Add Product</button>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
             </div>
         </div>
     </EditForm>
+
 </div>
+
 <AddCategoryModal />
 <DeleteModal />
+
 @code {
+    [Parameter]
+    public Guid ProductId { get; set; }
+
     private ProductDto ProductModel { get; set; } = new ProductDto();
     private List<CategoryDto> Categories { get; set; } = new();
     private List<SubCategoryDto> SubCategories { get; set; } = new();
@@ -281,37 +287,85 @@
 
     protected override async Task OnInitializedAsync()
     {
-       await LoadFiltersAsync();
+        await LoadFiltersAsync();
+        await LoadProductAsync();
     }
-    private async Task HandleAdd()
+
+    private async Task LoadProductAsync()
+    {
+        IsLoading = true;
+        try
+        {
+            var res = await ApiClient.GetAsync<ProductDto>($"/api/products/{ProductId}");
+            if (res.Success && res.Data != null)
+            {
+                ProductModel = res.Data;
+                PrimaryImage = ProductModel.ImageUrl ?? string.Empty;
+                PrimaryPreviewUrl = PrimaryImage;
+
+                // ensure categories loaded and subcategories for the product's category
+                if (ProductModel.CategoryId != Guid.Empty)
+                {
+                    // attempt paged then list fallback similar to AddProduct
+                    var pagedRes = await ApiClient.GetAsync<PagedResult<SubCategoryDto>>($"/api/subcategories?categoryId={ProductModel.CategoryId}");
+                    if (pagedRes.Success && pagedRes.Data != null && pagedRes.Data.Items != null)
+                    {
+                        SubCategories = pagedRes.Data.Items;
+                    }
+                    else
+                    {
+                        var listRes = await ApiClient.GetAsync<List<SubCategoryDto>>($"/api/subcategories?categoryId={ProductModel.CategoryId}");
+                        if (listRes.Success && listRes.Data != null)
+                        {
+                            SubCategories = listRes.Data;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                ToastService.ShowError(res.Message ?? "Failed to load product");
+                Navigation.NavigateTo("/admin/product-list");
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError("Error: " + ex.Message);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task HandleEdit()
     {
         if (isSubmitting) return;
         isSubmitting = true;
         try
         {
-            // ProductModel is bound to form inputs and validated by EditForm
             if (string.IsNullOrWhiteSpace(ProductModel.Name) || string.IsNullOrWhiteSpace(ProductModel.SKU))
             {
                 ToastService.ShowError("Please provide Name and SKU");
                 return;
             }
+
             ProductModel.ImageUrl = PrimaryImage ?? string.Empty;
 
-            var res = await ApiClient.PostAsync<ProductDto>("/api/products", ProductModel);
+            var res = await ApiClient.PutAsync<ProductDto>($"/api/products/{ProductModel.Id}", ProductModel);
             if (res.Success)
             {
-                await ShowToastAsync("Product created successfully", "success");
-                ResetForm();
+                ToastService.ShowSuccess("Product updated successfully");
                 Navigation.NavigateTo("/admin/product-list");
             }
             else
             {
-                await ShowToastAsync(res.Message ?? "Failed to create product", "error");
+                ToastService.ShowError(res.Message ?? "Failed to update product");
             }
         }
         catch (Exception ex)
         {
-            await ShowToastAsync("Error: " + ex.Message, "error");
+            ToastService.ShowError("Error: " + ex.Message);
         }
         finally
         {
@@ -325,7 +379,6 @@
         ProductModel.SKU = $"BATCH-{DateTime.UtcNow:yyyyMMddHHmmss}-{rnd.Next(1000, 9999)}";
     }
 
-    // Use Blazor ToastService instead of JS toastr
     private Task ShowToastAsync(string message, string type = "info")
     {
         switch (type)
@@ -345,13 +398,6 @@
         }
 
         return Task.CompletedTask;
-    }
-
-    private async Task OnFileSelected(ChangeEventArgs e)
-    {
-         // Recommend using InputFile; notify user
-         ToastService.ShowInfo("Please use the provided image upload widget (Drag & Drop) or use the Choose Image button.");
-         await Task.CompletedTask;
     }
 
     private async Task UploadAndPreview(IBrowserFile file)
@@ -388,7 +434,6 @@
         }
     }
 
-    // Helper for file input via InputFile component if used in future
     private async Task OnInputFileChanged(InputFileChangeEventArgs e)
     {
         var file = e.File;
@@ -400,34 +445,31 @@
         Category = e?.Value?.ToString() ?? string.Empty;
         if (Guid.TryParse(Category, out var id))
         {
-             ProductModel.CategoryId = id;
-             // fetch subcategories for selected category
-             // Some endpoints return paged data in `data` as { items: [...], total, page, pageSize }
-             // Try to read as PagedResult<SubCategoryDto> first and fall back to List<SubCategoryDto>
-             var pagedRes = await ApiClient.GetAsync<PagedResult<SubCategoryDto>>($"/api/subcategories?categoryId={id}");
-             if (pagedRes.Success && pagedRes.Data != null && pagedRes.Data.Items != null)
-             {
-                 SubCategories = pagedRes.Data.Items;
-             }
-             else
-             {
-                 // Fallback: try raw list
-                 var listRes = await ApiClient.GetAsync<List<SubCategoryDto>>($"/api/subcategories?categoryId={id}");
-                 if (listRes.Success && listRes.Data != null)
-                 {
-                     SubCategories = listRes.Data;
-                 }
-                 else
-                 {
-                     SubCategories = new List<SubCategoryDto>();
-                 }
-             }
-         }
-         else
-         {
-             ProductModel.CategoryId = Guid.Empty;
-             SubCategories = new List<SubCategoryDto>();
-         }
+            ProductModel.CategoryId = id;
+            // fetch subcategories for selected category
+            var pagedRes = await ApiClient.GetAsync<PagedResult<SubCategoryDto>>($"/api/subcategories?categoryId={id}");
+            if (pagedRes.Success && pagedRes.Data != null && pagedRes.Data.Items != null)
+            {
+                SubCategories = pagedRes.Data.Items;
+            }
+            else
+            {
+                var listRes = await ApiClient.GetAsync<List<SubCategoryDto>>($"/api/subcategories?categoryId={id}");
+                if (listRes.Success && listRes.Data != null)
+                {
+                    SubCategories = listRes.Data;
+                }
+                else
+                {
+                    SubCategories = new List<SubCategoryDto>();
+                }
+            }
+        }
+        else
+        {
+            ProductModel.CategoryId = Guid.Empty;
+            SubCategories = new List<SubCategoryDto>();
+        }
     }
 
     private Task OnSubCategoryChanged(ChangeEventArgs e)
@@ -435,11 +477,11 @@
         SubCategory = e?.Value?.ToString() ?? string.Empty;
         if (Guid.TryParse(SubCategory, out var id))
         {
-             ProductModel.SubCategoryId = id;
+            ProductModel.SubCategoryId = id;
         }
         else
         {
-             ProductModel.SubCategoryId = Guid.Empty;
+            ProductModel.SubCategoryId = Guid.Empty;
         }
         return Task.CompletedTask;
     }
@@ -450,24 +492,15 @@
         PrimaryPreviewUrl = string.Empty;
     }
 
-    private void ResetForm()
-    {
-        ProductModel = new ProductDto();
-        Category = string.Empty;
-        SubCategory = string.Empty;
-        PrimaryImage = string.Empty;
-        PrimaryPreviewUrl = string.Empty;
-    }
-
     private async Task RefreshForm()
     {
-         IsLoading = true;
-         try
-         {
-             ResetForm();
-             await LoadFiltersAsync();
-         }
-         finally { IsLoading = false; }
+        IsLoading = true;
+        try
+        {
+            await LoadFiltersAsync();
+            await LoadProductAsync();
+        }
+        finally { IsLoading = false; }
     }
 
     private void Cancel()
@@ -477,20 +510,20 @@
 
     private async Task LoadFiltersAsync()
     {
-         IsLoading = true;
-         try
-         {
-             var cres = await ApiClient.GetAsync<List<CategoryDto>>("/api/categories");
-             if (cres.Success && cres.Data != null) Categories = cres.Data;
-             else Categories = new List<CategoryDto>();
+        IsLoading = true;
+        try
+        {
+            var cres = await ApiClient.GetAsync<List<CategoryDto>>("/api/categories");
+            if (cres.Success && cres.Data != null) Categories = cres.Data;
+            else Categories = new List<CategoryDto>();
 
-             SubCategories = new List<SubCategoryDto>();
-         }
-         catch
-         {
-             Categories = new List<CategoryDto>();
-             SubCategories = new List<SubCategoryDto>();
-         }
-         finally { IsLoading = false; }
-     }
- }
+            SubCategories = new List<SubCategoryDto>();
+        }
+        catch
+        {
+            Categories = new List<CategoryDto>();
+            SubCategories = new List<SubCategoryDto>();
+        }
+        finally { IsLoading = false; }
+    }
+}

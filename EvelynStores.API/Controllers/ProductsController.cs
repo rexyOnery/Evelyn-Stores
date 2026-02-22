@@ -17,6 +17,31 @@ public class ProductsController : ControllerBase
         _productService = productService;
     }
 
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var list = await _productService.GetAllAsync();
+        return Ok(EvelynPhilApiResponse<List<ProductDto>>.SuccessResponse(list));
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> Get(Guid id)
+    {
+        var product = await _productService.GetByIdAsync(id);
+        if (product == null)
+            return NotFound(EvelynPhilApiResponse.ErrorResponse("Not found", 404));
+
+        return Ok(EvelynPhilApiResponse<ProductDto>.SuccessResponse(product));
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var ok = await _productService.DeleteAsync(id);
+        if (!ok) return NotFound(EvelynPhilApiResponse.ErrorResponse("Not found", 404));
+        return Ok(EvelynPhilApiResponse.SuccessResponse("Deleted"));
+    }
+
     [HttpPost("upload")]
     public async Task<IActionResult> Upload([FromForm] IFormFile file)
     {
@@ -46,6 +71,22 @@ public class ProductsController : ControllerBase
         }
     }
 
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(Guid id, [FromBody] ProductDto dto)
+    {
+        if (!ModelState.IsValid) return BadRequest(EvelynPhilApiResponse.ErrorResponse("Validation failed", 400));
+
+        try
+        {
+            var updated = await _productService.UpdateAsync(id, dto);
+            if (updated == null) return NotFound(EvelynPhilApiResponse.ErrorResponse("Not found", 404));
+            return Ok(EvelynPhilApiResponse<ProductDto>.SuccessResponse(updated));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, EvelynPhilApiResponse.ErrorResponse("Failed to update product.", 500, new List<string> { ex.Message }));
+        }
+    }
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] ProductDto dto)
     {

@@ -35,6 +35,14 @@ public class SubCategoriesController : ControllerBase
         return Ok(EvelynPhilApiResponse<PagedResponse<SubCategoryDto>>.SuccessResponse(paged));
     }
 
+    // Non-paged list endpoint for clients that expect a simple list
+    [HttpGet("all")]
+    public async Task<IActionResult> GetAllList()
+    {
+        var list = await _service.GetAllAsync();
+        return Ok(EvelynPhilApiResponse<List<SubCategoryDto>>.SuccessResponse(list));
+    }
+
     [HttpGet("{id}")]
     public async Task<IActionResult> Get(Guid id)
     {

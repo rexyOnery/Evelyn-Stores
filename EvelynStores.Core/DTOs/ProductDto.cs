@@ -17,7 +17,7 @@ public class ProductDto
     public Guid CategoryId { get; set; }
     public Guid SubCategoryId { get; set; }
     public Guid BrandId { get; set; }
-
+    public int ReOrderLevel { get; set; }
     public string Unit { get; set; } = string.Empty;
 
     [Range(0, int.MaxValue, ErrorMessage = "Quantity must be a positive number")]
