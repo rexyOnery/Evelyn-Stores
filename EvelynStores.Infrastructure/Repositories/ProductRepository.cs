@@ -18,6 +18,9 @@ public class ProductRepository : IProductRepository
 
     public async Task<List<Product>> GetAllAsync() => await _db.Products.ToListAsync();
 
+    public async Task<List<Product>> GetBySubCategoryAsync(Guid subCategoryId) =>
+        await _db.Products.Where(p => p.SubCategoryId == subCategoryId).ToListAsync();
+
     public async Task<Product?> GetByIdAsync(Guid id) => await _db.Products.FindAsync(id);
 
     public async Task UpdateAsync(Product product)

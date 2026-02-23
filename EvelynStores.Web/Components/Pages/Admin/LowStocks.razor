@@ -7,47 +7,47 @@
 
 <PageTitle>Low Stocks</PageTitle>
 <div class="content">
-	<div class="page-header">
-		<div class="page-title me-auto">
-			<h4 class="fw-bold">Low Stocks</h4>
-			<h6>Manage your low stocks</h6>
-		</div>
-		<ul class="table-top-head low-stock-top-head"> 
-			<li>
-				<a data-bs-toggle="tooltip" data-bs-placement="top" title="Refresh"><i class="ti ti-refresh"></i></a>
-			</li>
-			<li>
-				<a data-bs-toggle="tooltip" data-bs-placement="top" title="Collapse" id="collapse-header"><i class="ti ti-chevron-up"></i></a>
-			</li> 
-		</ul>
-	</div>
-	<div class="mb-4">
-		<div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
-			<ul class="nav nav-pills low-stock-tab d-flex me-2 mb-0" id="pills-tab" role="tablist">
-				<li class="nav-item" role="presentation">
-					<button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home" aria-selected="true">Low Stocks</button>
-				</li>
-				<li class="nav-item" role="presentation">
-					<button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Out of Stocks</button>
-				</li>
+    <div class="page-header">
+        <div class="page-title me-auto">
+            <h4 class="fw-bold">Low Stocks</h4>
+            <h6>Manage your low stocks</h6>
+        </div>
+        <ul class="table-top-head low-stock-top-head">
+            <li>
+                <a data-bs-toggle="tooltip" data-bs-placement="top" title="Refresh"><i class="ti ti-refresh"></i></a>
+            </li>
+            <li>
+                <a data-bs-toggle="tooltip" data-bs-placement="top" title="Collapse" id="collapse-header"><i class="ti ti-chevron-up"></i></a>
+            </li>
+        </ul>
+    </div>
+    <div class="mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+            <ul class="nav nav-pills low-stock-tab d-flex me-2 mb-0" id="pills-tab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home" aria-selected="true">Low Stocks</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Out of Stocks</button>
+                </li>
 
-			</ul>
-			 
-		</div>
-		<div class="tab-content" id="pills-tabContent">
-			<div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
-				<!-- /product list -->
+            </ul>
+
+        </div>
+        <div class="tab-content" id="pills-tabContent">
+            <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+                <!-- /product list -->
                 <div class="card">
-					<div class="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3">
-						<div class="search-set">
-							<div class="search-input">
-								<span class="btn-searchset"><i class="ti ti-search fs-14 feather-search"></i></span>
+                    <div class="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3">
+                        <div class="search-set">
+                            <div class="search-input">
+                                <span class="btn-searchset"><i class="ti ti-search fs-14 feather-search"></i></span>
                                 <input class="form-control ms-2" placeholder="Search by name or SKU" @bind="LowSearchTerm" @bind:event="oninput" />
                             </div>
-						</div>
+                        </div>
 
-						<div class="d-flex table-dropdown my-xl-auto right-content align-items-center flex-wrap row-gap-3">
-							  
+                        <div class="d-flex table-dropdown my-xl-auto right-content align-items-center flex-wrap row-gap-3">
+
                             <div style="min-width:200px;">
                                 <select class="form-select" @onchange="OnLowCategoryChanged">
                                     <option value="">All Categories</option>
@@ -57,8 +57,8 @@
                                     }
                                 </select>
                             </div>
-						</div>
-					</div>
+                        </div>
+                    </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table datatable">
@@ -89,18 +89,18 @@
                                                 <td>
                                                     <div class="d-flex align-items-center">
                                                         <a href="javascript:void(0);" class="avatar avatar-md me-2">
-                                                            <img src="@(string.IsNullOrEmpty(p.ImageUrl) ? "assets/img/products/stock-img-01.png" : p.ImageUrl)" alt="product">
+                                                            <img src="@(string.IsNullOrEmpty((GetProductImage(p.ProductId))) ? "assets/img/products/stock-img-01.png" : GetProductImage(p.ProductId))" alt="product">
                                                         </a>
-                                                        <a href="#" @onclick="() => ViewProduct(p.Id)" @onclick:preventDefault="true">@p.Name</a>
+                                                        <a href="#" @onclick="() => ViewProduct(p.Id)" @onclick:preventDefault="true">@GetProductName(p.ProductId)</a>
                                                     </div>
                                                 </td>
                                                 <td>@(Categories.FirstOrDefault(c => c.Id == p.CategoryId)?.Name ?? "-")</td>
-                                                <td>@p.SKU</td>
-                                                <td>@p.Quantity</td>
+                                                @* <td>@p.SKU</td> *@
+                                                <td>@p.PurchaseQuantity</td>
                                                 <td>@p.ReOrderLevel</td>
                                                 <td class="action-table-data">
                                                     <div class="edit-delete-action">
-														<a class="me-2 p-2" href="#" @onclick="() => ShowEditStock(p)" @onclick:preventDefault="true"><i data-feather="edit" class="bi bi-folder2-open"></i></a>
+                                                        @* <a class="me-2 p-2" href="#" @onclick="() => ShowEditStock(p)" @onclick:preventDefault="true"><i data-feather="edit" class="bi bi-folder2-open"></i></a> *@
                                                         <a class="p-2" href="#" @onclick="() => ConfirmDelete(p.Id)" @onclick:preventDefault="true"><i data-feather="trash-2" class="bi bi-trash3"></i></a>
                                                     </div>
                                                 </td>
@@ -111,21 +111,21 @@
                             </table>
                         </div>
                     </div>
-				</div>
-				<!-- /product list -->
-			</div>
-			<div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
-				<!-- /product list -->
-				<div class="card">
-					<div class="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3">
-						<div class="search-set">
-							<div class="search-input">
-						<span class="btn-searchset"><i class="ti ti-search fs-14 feather-search"></i></span>
-                        <input class="form-control ms-2" placeholder="Search by name or SKU" @bind="OutSearchTerm" @bind:event="oninput" />
-							</div>
-						</div>
-						<div class="d-flex table-dropdown my-xl-auto right-content align-items-center flex-wrap row-gap-3">
-							 
+                </div>
+                <!-- /product list -->
+            </div>
+            <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
+                <!-- /product list -->
+                <div class="card">
+                    <div class="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3">
+                        <div class="search-set">
+                            <div class="search-input">
+                                <span class="btn-searchset"><i class="ti ti-search fs-14 feather-search"></i></span>
+                                <input class="form-control ms-2" placeholder="Search by name or SKU" @bind="OutSearchTerm" @bind:event="oninput" />
+                            </div>
+                        </div>
+                        <div class="d-flex table-dropdown my-xl-auto right-content align-items-center flex-wrap row-gap-3">
+
                             <div class="me-2" style="min-width:200px;">
                                 <select class="form-select" @onchange="OnOutCategoryChanged">
                                     <option value="">All Categories</option>
@@ -135,83 +135,83 @@
                                     }
                                 </select>
                             </div>
-						</div>
-					</div>
-					<div class="card-body p-0">
-						<div class="table-responsive">
-							<table class="table datatable">
-								<thead class="thead-light">
-									<tr>
-										 
-										<th>Product Name</th>
-										<th>Category</th>
-										<th>SKU</th>
-										<th>Qty</th>
-										<th>Qty Alert</th>
-										<th class="no-sort">Action</th>
-									</tr>
-								</thead>
-					<tbody>
-						@if (OutOfStockList == null)
-						{
-							<tr><td colspan="6" class="text-center p-4">Loading...</td></tr>
-						}
-						else if (!OutOfStockList.Any())
-						{
-							<tr><td colspan="6" class="text-center p-4">No out of stock items.</td></tr>
-						}
-						else
-						{
-							@foreach (var p in OutOfStockList)
-							{
-								<tr>
-									<td>
-										<div class="d-flex align-items-center">
-											<a href="javascript:void(0);" class="avatar avatar-md me-2">
-												<img src="@(string.IsNullOrEmpty(p.ImageUrl) ? "assets/img/products/stock-img-01.png" : p.ImageUrl)" alt="product">
-											</a>
-											<a href="#" @onclick="() => ViewProduct(p.Id)" @onclick:preventDefault="true">@p.Name</a>
-										</div>
-									</td>
-									<td>@(Categories.FirstOrDefault(c => c.Id == p.CategoryId)?.Name ?? "-")</td>
-									<td>@p.SKU</td>
-									<td>@p.Quantity</td>
-									<td>@p.ReOrderLevel</td>
-									<td class="action-table-data">
-										<div class="edit-delete-action">
-											<a class="me-2 p-2" href="#" @onclick="() => ShowEditStock(p)" @onclick:preventDefault="true"><i data-feather="edit" class="bi bi-folder2-open"></i></a>
-											<a class="p-2" href="#" @onclick="() => ConfirmDelete(p.Id)" @onclick:preventDefault="true"><i data-feather="trash-2" class="bi bi-trash3"></i></a>
-										</div>
-									</td>
-								</tr>
-							}
-						}
-						</tbody>
-							</table>
-						</div>
-					</div>
-				</div>
-				<!-- /product list -->
-			</div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table datatable">
+                                <thead class="thead-light">
+                                    <tr>
 
-		</div>
-	</div>
+                                        <th>Product Name</th>
+                                        <th>Category</th>
+                                        @* <th>SKU</th> *@
+                                        <th>Qty</th>
+                                        <th>Qty Alert</th>
+                                        <th class="no-sort">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (OutOfStockList == null)
+                                    {
+                                        <tr><td colspan="6" class="text-center p-4">Loading...</td></tr>
+                                    }
+                                    else if (!OutOfStockList.Any())
+                                    {
+                                        <tr><td colspan="6" class="text-center p-4">No out of stock items.</td></tr>
+                                    }
+                                    else
+                                    {
+                                        @foreach (var p in OutOfStockList)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <a href="javascript:void(0);" class="avatar avatar-md me-2">
+                                                            <img src="@(string.IsNullOrEmpty((GetProductImage(p.ProductId))) ? "assets/img/products/stock-img-01.png" : GetProductImage(p.ProductId))" alt="product">
+                                                        </a>
+                                                        <a href="#" @onclick="() => ViewProduct(p.ProductId)" @onclick:preventDefault="true">@GetProductName(p.ProductId)</a>
+                                                    </div>
+                                                </td>
+                                                <td>@(Categories.FirstOrDefault(c => c.Id == p.CategoryId)?.Name ?? "-")</td>
+                                                @* <td>@p.SKU</td> *@
+                                                <td>@p.PurchaseQuantity</td>
+                                                <td>@p.ReOrderLevel</td>
+                                                <td class="action-table-data">
+                                                    <div class="edit-delete-action">
+                                                        @* <a class="me-2 p-2" href="#" @onclick="() => ShowEditStock(p)" @onclick:preventDefault="true"><i data-feather="edit" class="bi bi-folder2-open"></i></a> *@
+                                                        <a class="p-2" href="#" @onclick="() => ConfirmDelete(p.Id)" @onclick:preventDefault="true"><i data-feather="trash-2" class="bi bi-trash3"></i></a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <!-- /product list -->
+            </div>
+
+        </div>
+    </div>
 </div>
 
 <!-- Edit Low Stock -->
 <div class="modal fade" id="edit-stock">
-	<div class="modal-dialog modal-dialog-centered">
-		<div class="modal-content">
-			<div class="modal-header">
-				<div class="page-title">
-					<h4>Edit Low Stocks</h4>
-				</div>
-				<button type="button" class="close bg-danger text-white fs-16" data-bs-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true" class="fs-16">&times;</span>
-				</button>
-			</div>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="page-title">
+                    <h4>Edit Low Stocks</h4>
+                </div>
+                <button type="button" class="close bg-danger text-white fs-16" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true" class="fs-16">&times;</span>
+                </button>
+            </div>
             @* Edit form shown only when an item is selected for edit to avoid EditForm null model error *@
-            @if (EditProductModel != null)
+            @*  @if (EditProductModel != null)
             {
                 <EditForm Model="EditProductModel" OnValidSubmit="SaveStockChanges">
                     <DataAnnotationsValidator />
@@ -251,33 +251,35 @@
                 </div>
                 </EditForm>
             }
-		</div>
-	</div>
+		 *@
+        </div>
+    </div>
 </div>
 <!-- / Edit Low Stock -->
 <!-- delete modal -->
 <div class="modal fade" id="delete-modal">
-	<div class="modal-dialog modal-dialog-centered">
-		<div class="modal-content">
-			<div class="page-wrapper-new p-0">
-				<div class="content p-5 px-3 text-center">
-					<span class="rounded-circle d-inline-flex p-2 bg-danger-transparent mb-2"><i class="ti ti-trash fs-24 text-danger"></i></span>
-					<h4 class="fs-20 fw-bold mb-2 mt-1">Delete Product</h4>
-					<p class="mb-0 fs-16">Are you sure you want to delete product from low stock?</p>
-					<div class="modal-footer-btn mt-3 d-flex justify-content-center">
-						<button type="button" class="btn me-2 btn-secondary fs-13 fw-medium p-2 px-3 shadow-none" data-bs-dismiss="modal">Cancel</button>
-						<button type="submit" class="btn btn-primary fs-13 fw-medium p-2 px-3">Yes Delete</button>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="page-wrapper-new p-0">
+                <div class="content p-5 px-3 text-center">
+                    <span class="rounded-circle d-inline-flex p-2 bg-danger-transparent mb-2"><i class="ti ti-trash fs-24 text-danger"></i></span>
+                    <h4 class="fs-20 fw-bold mb-2 mt-1">Delete Product</h4>
+                    <p class="mb-0 fs-16">Are you sure you want to delete product from low stock?</p>
+                    <div class="modal-footer-btn mt-3 d-flex justify-content-center">
+                        <button type="button" class="btn me-2 btn-secondary fs-13 fw-medium p-2 px-3 shadow-none" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary fs-13 fw-medium p-2 px-3">Yes Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 @code {
-    private List<ProductDto>? AllProducts { get; set; }
-    private List<ProductDto>? LowStockList { get; set; }
-    private List<ProductDto>? OutOfStockList { get; set; }
+    private List<ProductLevelDto>? AllProducts { get; set; }
+    private List<ProductLevelDto>? LowStockList { get; set; }
+    private List<ProductLevelDto>? OutOfStockList { get; set; }
     private List<CategoryDto> Categories { get; set; } = new();
+    private List<ProductDto> Products { get; set; } = new();
 
     private ProductDto? EditProductModel { get; set; }
     private Guid? SelectedDeleteId;
@@ -329,25 +331,25 @@
         OutOfStockList = null;
         try
         {
-            var res = await ApiClient.GetAsync<List<ProductDto>>("/api/products");
+            var res = await ApiClient.GetAsync<List<ProductLevelDto>>("/api/productlevel");
             if (res.Success && res.Data != null)
             {
-                AllProducts = res.Data.OrderByDescending(p => p.CreatedAt).ToList();
+                AllProducts = res.Data.OrderByDescending(p => p.InStockQuantity).ToList();
                 ApplyFilters();
             }
             else
             {
-                AllProducts = new List<ProductDto>();
-                LowStockList = new List<ProductDto>();
-                OutOfStockList = new List<ProductDto>();
+                AllProducts = new List<ProductLevelDto>();
+                LowStockList = new List<ProductLevelDto>();
+                OutOfStockList = new List<ProductLevelDto>();
                 ToastService.ShowError(res.Message ?? "Failed to load products");
             }
         }
         catch (Exception ex)
         {
-            AllProducts = new List<ProductDto>();
-            LowStockList = new List<ProductDto>();
-            OutOfStockList = new List<ProductDto>();
+            AllProducts = new List<ProductLevelDto>();
+            LowStockList = new List<ProductLevelDto>();
+            OutOfStockList = new List<ProductLevelDto>();
             ToastService.ShowError("Error: " + ex.Message);
         }
     }
@@ -356,12 +358,12 @@
     {
         if (AllProducts == null)
         {
-            LowStockList = new List<ProductDto>();
-            OutOfStockList = new List<ProductDto>();
+            LowStockList = new List<ProductLevelDto>();
+            OutOfStockList = new List<ProductLevelDto>();
             return;
         }
 
-        IEnumerable<ProductDto> q = AllProducts;
+        IEnumerable<ProductLevelDto> q = AllProducts;
 
         // apply search for the two tabs independently
         if (!string.IsNullOrWhiteSpace(LowSearchTerm) || !string.IsNullOrWhiteSpace(OutSearchTerm))
@@ -371,17 +373,25 @@
             var outS = OutSearchTerm?.Trim();
             if (!string.IsNullOrWhiteSpace(lowS) && string.IsNullOrWhiteSpace(outS))
             {
-                q = q.Where(p => p.Name.Contains(lowS, StringComparison.OrdinalIgnoreCase) || p.SKU.Contains(lowS, StringComparison.OrdinalIgnoreCase));
+                var pid = Products.Where(p => p.Name.Contains(lowS, StringComparison.OrdinalIgnoreCase)).Select(p => p.Id).ToHashSet();
+
+                q = q.Where(p => pid.Contains(p.ProductId));// || p.SKU.Contains(lowS, StringComparison.OrdinalIgnoreCase));
             }
             else if (!string.IsNullOrWhiteSpace(outS) && string.IsNullOrWhiteSpace(lowS))
             {
-                q = q.Where(p => p.Name.Contains(outS, StringComparison.OrdinalIgnoreCase) || p.SKU.Contains(outS, StringComparison.OrdinalIgnoreCase));
+                var pid = Products.Where(p => p.Name.Contains(outS, StringComparison.OrdinalIgnoreCase)).Select(p => p.Id).ToHashSet();
+
+                q = q.Where(p => pid.Contains(p.ProductId));// || p.SKU.Contains(outS, StringComparison.OrdinalIgnoreCase));
             }
             else if (!string.IsNullOrWhiteSpace(lowS) && !string.IsNullOrWhiteSpace(outS))
             {
                 // if both set, apply both (intersection)
-                q = q.Where(p => (p.Name.Contains(lowS, StringComparison.OrdinalIgnoreCase) || p.SKU.Contains(lowS, StringComparison.OrdinalIgnoreCase))
-                                 || (p.Name.Contains(outS, StringComparison.OrdinalIgnoreCase) || p.SKU.Contains(outS, StringComparison.OrdinalIgnoreCase)));
+
+                var pid = Products.Where(p => p.Name.Contains(lowS, StringComparison.OrdinalIgnoreCase)).Select(p => p.Id).ToHashSet();
+                var pidOuts = Products.Where(p => p.Name.Contains(outS, StringComparison.OrdinalIgnoreCase)).Select(p => p.Id).ToHashSet();
+
+                q = q.Where(p => (pid.Contains(p.ProductId))// || p.SKU.Contains(lowS, StringComparison.OrdinalIgnoreCase))
+                                 || (pidOuts.Contains(p.ProductId)));
             }
         }
 
@@ -396,12 +406,13 @@
         }
 
         // Low stock: quantity <= reorder level but > 0
-        LowStockList = q.Where(p => p.Quantity > 0 && p.Quantity <= p.ReOrderLevel).OrderBy(p => p.Quantity).ToList();
+        LowStockList = q.Where(p => p.PurchaseQuantity > 0 && p.PurchaseQuantity <= p.ReOrderLevel).OrderBy(p => p.PurchaseQuantity).ToList();
 
         // Out of stock: quantity == 0
-        OutOfStockList = q.Where(p => p.Quantity == 0).OrderBy(p => p.Name).ToList();
+        OutOfStockList = q.Where(p => p.PurchaseQuantity == 0).OrderBy(p => p.ProductId).ToList();
     }
-
+    private string GetProductName(Guid id) => Products.FirstOrDefault(p => p.Id == id)?.Name ?? "-";
+    private string GetProductImage(Guid id) => Products.FirstOrDefault(p => p.Id == id)?.ImageUrl ?? "-";
     private async Task OnCategoryChanged(ChangeEventArgs e)
     {
         var val = e?.Value?.ToString();
@@ -435,27 +446,27 @@
         await Task.CompletedTask;
     }
 
-    private void ShowEditStock(ProductDto p)
-    {
-        EditProductModel = new ProductDto
-        {
-            Id = p.Id,
-            Name = p.Name,
-            SKU = p.SKU,
-            CategoryId = p.CategoryId,
-            Quantity = p.Quantity,
-            ReOrderLevel = p.ReOrderLevel
-        };
-        try { _ = JS.InvokeVoidAsync("eval", "$('#edit-stock').modal('show');"); } catch { }
-// This is a placeholder for a new comment or code addition.
-    }
+    //     private void ShowEditStock(ProductDto p)
+    //     {
+    //         EditProductModel = new ProductDto
+    //         {
+    //             Id = p.Id,
+    //             Name = p.Name,
+    //             SKU = p.SKU,
+    //             CategoryId = p.CategoryId,
+    //             Quantity = p.Quantity,
+    //             ReOrderLevel = p.ReOrderLevel
+    //         };
+    //         try { _ = JS.InvokeVoidAsync("eval", "$('#edit-stock').modal('show');"); } catch { }
+    // // This is a placeholder for a new comment or code addition.
+    //     }
 
     private async Task SaveStockChanges()
     {
         if (EditProductModel == null) return;
         try
         {
-			var res = await ApiClient.PutAsync<ProductDto>($"/api/products/{EditProductModel.Id}", EditProductModel);
+            var res = await ApiClient.PutAsync<ProductDto>($"/api/products/{EditProductModel.Id}", EditProductModel);
             if (res.Success)
             {
                 ToastService.ShowSuccess("Stock updated");

@@ -23,6 +23,8 @@ namespace EvelynStores.Infrastructure.Data
         public DbSet<Category> Categories { get; set; }
         public DbSet<SubCategory> SubCategories { get; set; }
         public DbSet<Product> Products { get; set; }
+        public DbSet<ProductLevel> ProductLevels { get; set; }
+        public DbSet<Purchase> Purchases { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -41,8 +43,16 @@ namespace EvelynStores.Infrastructure.Data
             {
                 entity.HasKey(p => p.Id);
                 entity.Property(p => p.Name).IsRequired().HasMaxLength(500);
-                entity.Property(p => p.SKU).HasMaxLength(100);
+                //entity.Property(p => p.SKU).HasMaxLength(100);
                 entity.Property(p => p.ImageUrl).HasColumnType("text");
+                entity.Property(p => p.CreatedAt).IsRequired();
+            });
+
+            modelBuilder.Entity<Purchase>(entity =>
+            {
+                entity.HasKey(p => p.Id);
+                entity.Property(p => p.SKU).IsRequired().HasMaxLength(100);
+                entity.Property(p => p.TotalAmount).HasColumnType("decimal(18,2)");
                 entity.Property(p => p.CreatedAt).IsRequired();
             });
 

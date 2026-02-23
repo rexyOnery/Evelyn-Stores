@@ -54,8 +54,8 @@
                                 @* <li><h6 class="mb-1">Brand</h6><div>@GetBrandName(Product.BrandId)</div></li> *@
                                 <li><h6 class="mb-1">Unit</h6><div>@Product.Unit</div></li>
                                 <li><h6 class="mb-1">SKU</h6><div>@Product.SKU</div></li>
-                                <li><h6 class="mb-1">ReOrder Qty</h6><div>@Product.ReOrderLevel</div></li>
-                                <li><h6 class="mb-1">Quantity</h6><div>@Product.Quantity</div></li>
+                                <li><h6 class="mb-1">ReOrder Qty</h6><div>@(GetProductLevel(Product.Id).ReOrderLevel)</div></li>
+                                <li><h6 class="mb-1">Quantity</h6><div>@(GetProductLevel(Product.Id).PurchaseQuantity)</div></li>
                                 <li><h6 class="mb-1">Price</h6><div>@Product.Price.ToString("C")</div></li>
                                 <li><h6 class="mb-1">Manufactured Date</h6><div>@(Product.ManufacturedDate?.ToString("dd MMM yyyy") ?? "-")</div></li>
                                 <li><h6 class="mb-1">Expiry Date</h6><div>@(Product.ExpiryDate?.ToString("dd MMM yyyy") ?? "-")</div></li>
@@ -101,6 +101,8 @@
 
     private List<CategoryDto> Categories { get; set; } = new();
     private List<SubCategoryDto> SubCategories { get; set; } = new();
+    private List<ProductLevelDto> AllProductLevels { get; set; } = new();
+    private List<PurchaseDto> AllPurchases { get; set; } = new();
     private List<BrandDto> Brands { get; set; } = new();
 
     private bool CanEdit => Product != null;
@@ -153,6 +155,9 @@
 
             var sres = await ApiClient.GetAsync<List<SubCategoryDto>>("/api/subcategories/all");
             if (sres.Success && sres.Data != null) SubCategories = sres.Data;
+
+            var plres = await ApiClient.GetAsync<List<ProductLevelDto>>("/api/productlevel/all");
+            if (plres.Success && plres.Data != null) AllProductLevels = plres.Data;
         }
         catch { }
     }
@@ -160,6 +165,8 @@
     private string GetCategoryName(Guid id) => Categories.FirstOrDefault(c => c.Id == id)?.Name ?? "-";
     private string GetBrandName(Guid id) => Brands.FirstOrDefault(b => b.Id == id)?.Name ?? "-";
     private string GetSubCategoryName(Guid id) => SubCategories.FirstOrDefault(s => s.Id == id)?.Name ?? "-";
+    private ProductLevelDto GetProductLevel(Guid id) => AllProductLevels.FirstOrDefault(s => s.ProductId == id)!;
+    private PurchaseDto GetPurchases(Guid id) => AllPurchases.FirstOrDefault(s => s.ProductId == id)!;
 
     private void Back() => Navigation.NavigateTo("/admin/product-list");
     private void EditProduct(Guid id)

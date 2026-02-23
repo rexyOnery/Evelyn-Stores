@@ -18,10 +18,16 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] Guid? subCategoryId)
     {
-        var list = await _productService.GetAllAsync();
-        return Ok(EvelynPhilApiResponse<List<ProductDto>>.SuccessResponse(list));
+        if (subCategoryId.HasValue && subCategoryId != Guid.Empty)
+        {
+            var list = await _productService.GetBySubCategoryAsync(subCategoryId.Value);
+            return Ok(EvelynPhilApiResponse<List<ProductDto>>.SuccessResponse(list));
+        }
+
+        var all = await _productService.GetAllAsync();
+        return Ok(EvelynPhilApiResponse<List<ProductDto>>.SuccessResponse(all));
     }
 
     [HttpGet("{id}")]

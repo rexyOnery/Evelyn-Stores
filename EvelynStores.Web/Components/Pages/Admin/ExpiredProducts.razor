@@ -76,9 +76,9 @@
                                     <td>
                                         <div class="d-flex align-items-center">
                                             <a href="javascript:void(0);" class="avatar avatar-md me-2">
-                                                <img src="@(string.IsNullOrEmpty(p.ImageUrl) ? "assets/img/products/stock-img-01.png" : p.ImageUrl)" alt="product">
+                                                <img src="@(string.IsNullOrEmpty((GetProductImage(p.Id))) ? "assets/img/products/stock-img-01.png" : GetProductImage(p.Id))" alt="product">
                                             </a>
-                                            <a href="javascript:void(0);">@p.Name</a>
+                                            <a href="javascript:void(0);">@GetProductName(p.Id)</a>
                                         </div>
                                     </td>
                                     <td>@(p.ManufacturedDate?.ToString("dd MMM yyyy") ?? "-")</td>
@@ -103,8 +103,10 @@
 </div>
 
 @code {
-    private List<ProductDto>? AllProducts { get; set; }
-    private List<ProductDto> ExpiredList { get; set; } = new();
+    private List<PurchaseDto>? AllPurchases { get; set; }
+    private List<ProductDto> Products { get; set; } = new();
+    private List<ProductDto> AllProducts { get; set; } = new();
+    private List<PurchaseDto> ExpiredList { get; set; } = new();
     private List<CategoryDto> Categories { get; set; } = new();
     private Guid? SelectedDeleteId;
 
@@ -137,48 +139,53 @@
         catch { }
     }
 
+    private string GetProductName(Guid id) => AllProducts.FirstOrDefault(p => p.Id == id)?.Name ?? "-";
+    private string GetProductImage(Guid id) => AllProducts.FirstOrDefault(p => p.Id == id)?.ImageUrl ?? "-";
+
+
     private async Task LoadProductsAsync()
     {
         ExpiredList = null;
         try
         {
-            var res = await ApiClient.GetAsync<List<ProductDto>>("/api/products");
+            var res = await ApiClient.GetAsync<List<PurchaseDto>>("/api/purchases");
             if (res.Success && res.Data != null)
             {
-                AllProducts = res.Data.OrderByDescending(p => p.CreatedAt).ToList();
+                AllPurchases = res.Data.OrderByDescending(p => p.CreatedAt).ToList();
                 ApplyFilters();
             }
             else
             {
-                AllProducts = new List<ProductDto>();
-                ExpiredList = new List<ProductDto>();
+                AllPurchases = new List<PurchaseDto>();
+                ExpiredList = new List<PurchaseDto>();
                 ToastService.ShowError(res.Message ?? "Failed to load products");
             }
         }
         catch (Exception ex)
         {
-            AllProducts = new List<ProductDto>();
-            ExpiredList = new List<ProductDto>();
+            AllPurchases = new List<PurchaseDto>();
+            ExpiredList = new List<PurchaseDto>();
             ToastService.ShowError("Error: " + ex.Message);
         }
     }
 
     private void ApplyFilters()
     {
-        if (AllProducts == null)
+        if (AllPurchases == null)
         {
-            ExpiredList = new List<ProductDto>();
+            ExpiredList = new List<PurchaseDto>();
             return;
         }
 
         var today = DateTime.UtcNow.Date;
-        IEnumerable<ProductDto> q = AllProducts.Where(p => p.ExpiryDate.HasValue && p.ExpiryDate.Value.Date <= today);
+        IEnumerable<PurchaseDto> q = AllPurchases.Where(p => p.ExpiryDate.HasValue && p.ExpiryDate.Value.Date <= today);
 
         if (!string.IsNullOrWhiteSpace(SearchTerm))
         {
             var s = SearchTerm.Trim();
-            q = q.Where(p => p.Name.Contains(s, StringComparison.OrdinalIgnoreCase) || p.SKU.Contains(s, StringComparison.OrdinalIgnoreCase));
-        }
+            var pid = Products.Where(p => p.Name.Contains(s, StringComparison.OrdinalIgnoreCase)).Select(p => p.Id).ToHashSet();
+            q = q.Where(p => pid.Contains(p.ProductId) || p.SKU.Contains(s, StringComparison.OrdinalIgnoreCase));
+        } 
 
         if (selectedCategoryId.HasValue && selectedCategoryId != Guid.Empty)
         {

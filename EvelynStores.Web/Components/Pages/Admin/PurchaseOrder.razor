@@ -1,0 +1,273 @@
+﻿@page "/admin/purchase-order-report"
+@using EvelynStores.Core.DTOs
+@inject IEvelynPhilApiHttpClient ApiClient
+@inject NavigationManager Navigation
+@inject EvelynStores.Web.Services.ToastService ToastService
+
+<PageTitle>Purchase Orders</PageTitle>
+
+<div class="content">
+    <div class="page-header">
+        <div class="add-item d-flex">
+            <div class="page-title">
+                <h4 class="fw-bold">Purchase Orders</h4>
+                <h6>Manage your purchase orders</h6>
+            </div>
+            @* Reorder Modal *@
+            @if (IsReorderModalOpen)
+            {
+                <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Set Re-order Level</h5>
+                                <button type="button" class="close bg-danger text-white fs-16" data-bs-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Re-order level</label>
+                                    <InputNumber class="form-control" @bind-Value="NewReorderLevel" />
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn me-2 btn-secondary" @onclick="CloseReorderModal">Cancel</button>
+                                <button class="btn btn-primary" @onclick="SaveReorderLevel">Save</button>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        <ul class="table-top-head low-stock-top-head">
+            <li>
+                <a href="#" @onclick="Refresh" @onclick:preventDefault="true" data-bs-toggle="tooltip" data-bs-placement="top" title="Refresh"><i class="ti ti-refresh"></i></a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <div class="w-50">
+                <input class="form-control" placeholder="Search by product name" @bind="SearchTerm" @bind:event="oninput" />
+            </div>
+            <div class="ms-2" style="min-width:200px;">
+                <select class="form-select" @bind="SelectedCategoryId">
+                    <option value="">All Categories</option>
+                    @foreach (var c in Categories)
+                    {
+                        <option value="@c.Id">@c.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Purchased QTY</th>
+                            <th>In Stock QTY</th>
+                            <th>Re-Order Level</th>
+                            <th class="no-sort"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (FilteredLevels == null)
+                        {
+                            <tr><td colspan="4" class="text-center p-4">Loading...</td></tr>
+                        }
+                        else if (!FilteredLevels.Any())
+                        {
+                            <tr><td colspan="4" class="text-center p-4">No purchase orders found.</td></tr>
+                        }
+                        else
+                        {
+                            @foreach (var pl in FilteredLevels)
+                            {
+                                var prod = Products.FirstOrDefault(p => p.Id == pl.ProductId);
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <a class="avatar avatar-md me-2">
+                                                <img src="@(string.IsNullOrEmpty(prod?.ImageUrl) ? "assets/img/products/stock-img-01.png" : prod.ImageUrl)" alt="product" />
+                                            </a>
+                                            <span>@(prod?.Name ?? "-")</span>
+                                        </div>
+                                    </td>
+                                    <td>@pl.PurchaseQuantity</td>
+                                    <td>@pl.InStockQuantity</td>
+                                    <td>@pl.ReOrderLevel</td>
+                                    <td class="action-table-data">
+                                        <div class="edit-delete-action">
+                                            <a class="me-2 p-2" href="#" @onclick="() => ShowReorderModal(pl.ProductId)" @onclick:preventDefault="true" title="Set Reorder Level">
+                                                <i data-feather="edit" class="bi bi-pencil-square"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<ProductLevelDto>? Levels;
+    private List<ProductLevelDto>? FilteredLevels;
+    private List<ProductDto> Products { get; set; } = new();
+    private List<CategoryDto> Categories { get; set; } = new();
+
+    private Guid? _selectedCategoryId;
+    private Guid? SelectedCategoryId
+    {
+        get => _selectedCategoryId;
+        set
+        {
+            _selectedCategoryId = value;
+            ApplyFilters();
+        }
+    }
+
+    private string _searchTerm = string.Empty;
+    private string SearchTerm
+    {
+        get => _searchTerm;
+        set
+        {
+            _searchTerm = value;
+            ApplyFilters();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadLookupsAsync();
+        await LoadLevelsAsync();
+    }
+
+    private async Task LoadLookupsAsync()
+    {
+        try
+        {
+            var cres = await ApiClient.GetAsync<List<CategoryDto>>("/api/categories");
+            if (cres.Success && cres.Data != null) Categories = cres.Data;
+
+            var pres = await ApiClient.GetAsync<List<ProductDto>>("/api/products");
+            if (pres.Success && pres.Data != null) Products = pres.Data;
+        }
+        catch { }
+    }
+
+    private async Task LoadLevelsAsync()
+    {
+        Levels = null;
+        try
+        {
+            var res = await ApiClient.GetAsync<List<ProductLevelDto>>("/api/productlevels");
+            if (res.Success && res.Data != null)
+            {
+                Levels = res.Data;
+            }
+            else
+            {
+                Levels = new List<ProductLevelDto>();
+            }
+        }
+        catch
+        {
+            Levels = new List<ProductLevelDto>();
+        }
+        ApplyFilters();
+    }
+
+    private void ApplyFilters()
+    {
+        if (Levels == null) { FilteredLevels = new List<ProductLevelDto>(); return; }
+        IEnumerable<ProductLevelDto> q = Levels;
+        if (!string.IsNullOrWhiteSpace(SearchTerm))
+        {
+            var s = SearchTerm.Trim();
+            var pids = Products.Where(p => p.Name.Contains(s, StringComparison.OrdinalIgnoreCase)).Select(p => p.Id).ToHashSet();
+            q = q.Where(l => pids.Contains(l.ProductId));
+        }
+        if (SelectedCategoryId.HasValue && SelectedCategoryId != Guid.Empty)
+        {
+            var cat = SelectedCategoryId.Value;
+            var pids = Products.Where(p => p.CategoryId == cat).Select(p => p.Id).ToHashSet();
+            q = q.Where(l => pids.Contains(l.ProductId));
+        }
+        FilteredLevels = q.ToList();
+    }
+
+    private async Task OnCategoryChanged(ChangeEventArgs e)
+    {
+        var v = e?.Value?.ToString();
+        if (Guid.TryParse(v, out var gid)) SelectedCategoryId = gid; else SelectedCategoryId = null;
+        ApplyFilters();
+        await Task.CompletedTask;
+    }
+
+    private void OnSearchChanged(ChangeEventArgs e)
+    {
+        SearchTerm = e?.Value?.ToString() ?? string.Empty;
+        ApplyFilters();
+    }
+
+    private async Task Refresh()
+    {
+        await LoadLookupsAsync();
+        await LoadLevelsAsync();
+        ToastService.ShowSuccess("Purchase orders refreshed");
+        StateHasChanged();
+    }
+
+    // Reorder modal state
+    private bool IsReorderModalOpen { get; set; }
+    private Guid CurrentProductIdForReorder { get; set; }
+    private int NewReorderLevel { get; set; }
+
+    private void ShowReorderModal(Guid productId)
+    {
+        CurrentProductIdForReorder = productId;
+        var existing = Levels?.FirstOrDefault(l => l.ProductId == productId);
+        NewReorderLevel = existing?.ReOrderLevel ?? 0;
+        IsReorderModalOpen = true;
+    }
+
+    private void CloseReorderModal()
+    {
+        IsReorderModalOpen = false;
+        CurrentProductIdForReorder = Guid.Empty;
+        NewReorderLevel = 0;
+    }
+
+    private async Task SaveReorderLevel()
+    {
+        try
+        {
+            var req = new { ReOrderLevel = NewReorderLevel };
+            var res = await ApiClient.PostAsync<ProductLevelDto>($"/api/productlevels/set-reorder/{CurrentProductIdForReorder}", req);
+            if (res.Success)
+            {
+                ToastService.ShowSuccess("Re-order level updated");
+                await LoadLevelsAsync();
+                CloseReorderModal();
+            }
+            else
+            {
+                ToastService.ShowError(res.Message ?? "Failed to set reorder level");
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError("Error: " + ex.Message);
+        }
+    }
+}

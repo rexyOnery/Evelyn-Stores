@@ -5,5 +5,6 @@
     <Project Path="EvelynStores.Infrastructure/EvelynStores.Infrastructure.csproj" />
   </Folder>
   <Project Path="EvelynStores.API/EvelynStores.API.csproj" />
+  <Project Path="EvelynStores.Shop/EvelynStores.Shop.csproj" Id="d9ecb676-8597-471a-b387-94145968fbff" />
   <Project Path="EvelynStores.Web/EvelynStores.Web.csproj" />
 </Solution>

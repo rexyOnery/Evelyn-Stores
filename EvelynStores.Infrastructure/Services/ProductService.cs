@@ -15,25 +15,43 @@ public class ProductService : IProductService
         {
             Id = dto.Id == Guid.Empty ? Guid.NewGuid() : dto.Id,
             Name = dto.Name,
-            SKU = dto.SKU,
+            //  SKU = dto.SKU,
             CategoryId = dto.CategoryId,
             SubCategoryId = dto.SubCategoryId,
             BrandId = dto.BrandId,
             Unit = dto.Unit,
-            Quantity = dto.Quantity,
-            Price = dto.Price,
+            //Quantity = dto.Quantity,
+            //Price = dto.Price,
             ImageUrl = dto.ImageUrl,
             CreatedBy = dto.CreatedBy,
             CreatedAt = dto.CreatedAt == default ? DateTime.UtcNow : dto.CreatedAt,
-            ManufacturedDate = dto.ManufacturedDate,
-            ExpiryDate = dto.ExpiryDate,
-            ReOrderLevel = dto.ReOrderLevel
+            //ManufacturedDate = dto.ManufacturedDate,
+            //ExpiryDate = dto.ExpiryDate,
+            //ReOrderLevel = dto.ReOrderLevel
         };
 
         await _repo.AddAsync(p);
         dto.Id = p.Id;
+        dto.Unit = p.Unit;
         dto.CreatedAt = p.CreatedAt;
         return dto;
+    }
+
+    public async Task<List<ProductDto>> GetBySubCategoryAsync(Guid subCategoryId)
+    {
+        var list = await _repo.GetBySubCategoryAsync(subCategoryId);
+        return list.Select(p => new ProductDto
+        {
+            Id = p.Id,
+            Name = p.Name,
+            CategoryId = p.CategoryId,
+            SubCategoryId = p.SubCategoryId,
+            BrandId = p.BrandId,
+            Unit = p.Unit,
+            ImageUrl = p.ImageUrl,
+            CreatedBy = p.CreatedBy,
+            CreatedAt = p.CreatedAt,
+        }).ToList();
     }
 
     public async Task<ProductDto?> UpdateAsync(Guid id, ProductDto dto)
@@ -42,21 +60,22 @@ public class ProductService : IProductService
         if (existing == null) return null;
 
         existing.Name = dto.Name;
-        existing.SKU = dto.SKU;
+       //existing.SKU = dto.SKU;
         existing.CategoryId = dto.CategoryId;
         existing.SubCategoryId = dto.SubCategoryId;
         existing.BrandId = dto.BrandId;
         existing.Unit = dto.Unit;
-        existing.Quantity = dto.Quantity;
-        existing.Price = dto.Price;
+        //existing.Quantity = dto.Quantity;
+        //existing.Price = dto.Price;
         existing.ImageUrl = dto.ImageUrl;
-        existing.ManufacturedDate = dto.ManufacturedDate;
-        existing.ExpiryDate = dto.ExpiryDate;
-        existing.ReOrderLevel = dto.ReOrderLevel;
+        //existing.ManufacturedDate = dto.ManufacturedDate;
+        //existing.ExpiryDate = dto.ExpiryDate;
+        //existing.ReOrderLevel = dto.ReOrderLevel;
 
         await _repo.UpdateAsync(existing);
 
         dto.Id = existing.Id;
+        dto.Unit = existing.Unit;
         dto.CreatedAt = existing.CreatedAt;
         return dto;
     }
@@ -69,19 +88,19 @@ public class ProductService : IProductService
         {
             Id = p.Id,
             Name = p.Name,
-            SKU = p.SKU,
+            //SKU = p.SKU,
             CategoryId = p.CategoryId,
             SubCategoryId = p.SubCategoryId,
             BrandId = p.BrandId,
             Unit = p.Unit,
-            Quantity = p.Quantity,
-            ReOrderLevel = p.ReOrderLevel,
-            Price = p.Price,
+            //Quantity = p.Quantity,
+            //ReOrderLevel = p.ReOrderLevel,
+            //Price = p.Price,
             ImageUrl = p.ImageUrl,
             CreatedBy = p.CreatedBy,
             CreatedAt = p.CreatedAt,
-            ManufacturedDate = p.ManufacturedDate,
-            ExpiryDate = p.ExpiryDate
+            //ManufacturedDate = p.ManufacturedDate,
+            //ExpiryDate = p.ExpiryDate
         };
     }
 
@@ -92,19 +111,19 @@ public class ProductService : IProductService
         {
             Id = p.Id,
             Name = p.Name,
-            SKU = p.SKU,
+           // SKU = p.SKU,
             CategoryId = p.CategoryId,
             SubCategoryId = p.SubCategoryId,
             BrandId = p.BrandId,
             Unit = p.Unit,
-            Quantity = p.Quantity,
-            ReOrderLevel = p.ReOrderLevel,
-            Price = p.Price,
+            //Quantity = p.Quantity,
+            //ReOrderLevel = p.ReOrderLevel,
+            //Price = p.Price,
             ImageUrl = p.ImageUrl,
             CreatedBy = p.CreatedBy,
             CreatedAt = p.CreatedAt,
-            ManufacturedDate = p.ManufacturedDate,
-            ExpiryDate = p.ExpiryDate,
+            //ManufacturedDate = p.ManufacturedDate,
+            //ExpiryDate = p.ExpiryDate,
             
         }).ToList();
     }

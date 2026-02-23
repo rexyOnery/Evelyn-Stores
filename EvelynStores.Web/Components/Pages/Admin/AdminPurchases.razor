@@ -1,0 +1,299 @@
+﻿@page "/admin/purchase-list"
+@using EvelynStores.Core.DTOs
+@inject IEvelynPhilApiHttpClient ApiClient
+@inject NavigationManager Navigation
+@inject EvelynStores.Web.Services.ToastService ToastService
+@inject IJSRuntime JS
+
+<PageTitle>Admin Puchases</PageTitle>
+
+<div class="content">
+	<div class="page-header">
+		<div class="add-item d-flex">
+			<div class="page-title">
+				<h4 class="fw-bold">Product Purchase List</h4>
+				<h6>Manage your product Purchases</h6>
+			</div>
+		</div>
+		<ul class="table-top-head">
+			 
+			<li>
+                <a @onclick="() => RefreshProduct()" data-bs-toggle="tooltip" data-bs-placement="top" title="Refresh"><i class="ti ti-refresh"></i></a>
+			</li>
+			<li>
+				<a data-bs-toggle="tooltip" data-bs-placement="top" title="Collapse" id="collapse-header"><i class="ti ti-chevron-up"></i></a>
+			</li>
+		</ul>
+        <div class="page-btn">
+            <a href="/admin/add-purchases" class="btn btn-primary"><i class="ti ti-circle-plus me-1"></i>Add Purchase</a>
+        </div>
+		@* <div class="page-btn import">
+			<a href="#" class="btn btn-secondary color" data-bs-toggle="modal" data-bs-target="#view-notes">
+				<i data-feather="download" class="me-1"></i>Import Product
+			</a>
+		</div> *@
+	</div>
+
+	<!-- /product list -->
+	<div class="card">
+		<div class="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3">
+			<div class="search-set">
+				<div class="search-input d-flex align-items-center">
+					<span class="btn-searchset"><i class="ti ti-search fs-14 feather-search"></i></span>
+                <input class="form-control ms-2" placeholder="Search by name or SKU" @bind="SearchTerm" @bind:event="oninput" />
+				</div>
+			</div>
+			<div class="d-flex table-dropdown my-xl-auto right-content align-items-center flex-wrap row-gap-3">
+				<div class="me-2" style="min-width:200px;">
+					<select class="form-select" @onchange="OnCategoryChanged">
+						<option value="">All Categories</option>
+						@foreach (var c in Categories)
+						{
+							<option value="@c.Id">@c.Name</option>
+						}
+					</select>
+				</div>
+				@* <div class="dropdown">
+					<a href="javascript:void(0);" class="dropdown-toggle btn btn-white btn-md d-inline-flex align-items-center" data-bs-toggle="dropdown">
+						Brand
+					</a>
+					<ul class="dropdown-menu  dropdown-menu-end p-3">
+						<li>
+							<a href="javascript:void(0);" class="dropdown-item rounded-1">Lenovo</a>
+						</li>
+						<li>
+							<a href="javascript:void(0);" class="dropdown-item rounded-1">Beats</a>
+						</li>
+						<li>
+							<a href="javascript:void(0);" class="dropdown-item rounded-1">Nike</a>
+						</li>
+						<li>
+							<a href="javascript:void(0);" class="dropdown-item rounded-1">Apple</a>
+						</li>
+					</ul>
+				</div> *@
+			</div>
+		</div>
+		<div class="card-body p-0">
+			<div class="table-responsive">
+				<table class="table datatable">
+					<thead class="thead-light">
+						<tr> 
+							<th>SKU/Batch </th>
+							<th>Product Name</th>
+							<th>Category</th>
+							@* <th>Brand</th> *@
+							<th>Price</th>
+							<th>Unit</th>
+							<th>Qty</th>
+							@* <th>Created By</th> *@
+							<th class="no-sort"></th>
+						</tr>
+					</thead>
+                    <tbody>
+                        @if (Purchased == null)
+                        {
+                            <tr><td colspan="10">Loading...</td></tr>
+                        }
+                        else if (!Purchased.Any())
+                        {
+                            <tr><td colspan="10">No products found.</td></tr>
+                        }
+                        else
+                        {
+                            @foreach (var p in Purchased)
+                            {
+                                <tr> 
+                                    <td>@p.SKU</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <a href="javascript:void(0);" class="avatar avatar-md me-2">
+                                                <img src="@(string.IsNullOrEmpty((GetProductImage(p.ProductId))) ? "assets/img/products/stock-img-01.png" : GetProductImage(p.ProductId))" alt="product">
+                                            </a>
+                                            <a href="javascript:void(0);">@GetProductName(p.ProductId)</a>
+                                        </div>
+                                    </td>
+                                    <td>@(GetCategoryName(p.CategoryId))</td>
+                                   @*  <td>@(GetBrandName(p.BrandId))</td> *@
+                                    <td>₦@(p.UnitCost.ToString("C").Substring(1))</td>
+                                    <td>@p.Quantity</td>
+                                    <td>₦@(p.TotalAmount.ToString("C").Substring(1))</td>
+                                   @*  <td>@p.CreatedBy</td> *@
+                                    <td class="action-table-data">
+                                        <div class="edit-delete-action">
+                                           @*  <a class="me-2 edit-icon  p-2" @onclick="() => ViewProduct(p.Id)" @onclick:preventDefault="true">
+                                                <i data-feather="eye" class="fa fa-eye"></i>
+                                            </a> 
+                                            <a class="me-2 p-2" @onclick="() => EditProduct(p.Id)" @onclick:preventDefault="true">
+                                                <i data-feather="edit" class="bi bi-folder2-open"></i>
+                                            </a>*@
+                                            <a class="p-2" href="#" @onclick="() => ConfirmDelete(p.Id)" @onclick:preventDefault="true">
+                                                <i data-feather="trash-2" class="bi bi-trash2"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    
+                    </tbody>
+                </table>
+			</div>
+		</div>
+	</div>
+	<!-- /product list -->
+</div>
+<DeleteModal Entity="Purchase" EntityId="SelectedDeleteId" OnConfirm="DeleteProduct" />
+
+@code {
+    private List<PurchaseDto>? Purchased;
+    private List<PurchaseDto> AllPurchases { get; set; } = new();
+    private List<ProductDto> Products { get; set; } = new();
+    private List<ProductDto> AllProducts { get; set; } = new();
+    private List<PurchaseDto> FilteredPurchases { get; set; } = new();
+    private Guid? SelectedDeleteId;
+    private List<CategoryDto> Categories { get; set; } = new();
+    private List<BrandDto> Brands { get; set; } = new();
+    private string _searchTerm = string.Empty;
+    private string SearchTerm
+    {
+        get => _searchTerm;
+        set
+        {
+            _searchTerm = value;
+            ApplyFilters();
+        }
+    }
+    private Guid? selectedCategoryId = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadLookupsAsync();
+        await LoadPurchasesAsync();
+        await LoadProductsAsync();
+    }
+
+    private async Task RefreshProduct() => await LoadProductsAsync();
+
+    private async Task LoadProductsAsync()
+    {
+        Products = null;
+        var res = await ApiClient.GetAsync<List<ProductDto>>("/api/products");
+        if (res.Success && res.Data != null)
+        {
+            AllProducts = res.Data.OrderByDescending(p => p.CreatedAt).ToList(); 
+        }
+        else
+        {
+            AllProducts = new List<ProductDto>(); 
+            Products = new List<ProductDto>();
+            ToastService.ShowError(res.Message ?? "Failed to load products");
+        }
+    }
+
+    private async Task LoadPurchasesAsync()
+    {
+        Purchased = null;
+        var res = await ApiClient.GetAsync<List<PurchaseDto>>("/api/purchases");
+        if (res.Success && res.Data != null)
+        {
+            AllPurchases = res.Data.OrderByDescending(p => p.CreatedAt).ToList();
+            FilteredPurchases = AllPurchases.ToList();
+            Purchased = FilteredPurchases;
+        }
+        else
+        {
+            AllPurchases = new List<PurchaseDto>();
+            FilteredPurchases = new List<PurchaseDto>();
+            Purchased = new List<PurchaseDto>();
+            ToastService.ShowError(res.Message ?? "Failed to load purchases");
+        }
+    }
+
+    private async Task LoadLookupsAsync()
+    {
+        try
+        {
+            var cres = await ApiClient.GetAsync<List<CategoryDto>>("/api/categories");
+            if (cres.Success && cres.Data != null) Categories = cres.Data;
+
+            var bres = await ApiClient.GetAsync<List<BrandDto>>("/api/brands");
+            if (bres.Success && bres.Data != null) Brands = bres.Data;
+        }
+        catch
+        {
+            // ignore lookup failures; getters will return fallback
+        }
+    }
+
+    private string GetCategoryName(Guid id) => Categories.FirstOrDefault(c => c.Id == id)?.Name ?? "-";
+    private string GetBrandName(Guid id) => Brands.FirstOrDefault(b => b.Id == id)?.Name ?? "-";
+    private string GetProductName(Guid id) => AllProducts.FirstOrDefault(p => p.Id == id)?.Name ?? "-";
+    private string GetProductImage(Guid id) => AllProducts.FirstOrDefault(p => p.Id == id)?.ImageUrl ?? "-";
+
+    private void ViewProduct(Guid id) => Navigation.NavigateTo($"/admin/product-details/{id}");
+    private void EditProduct(Guid id) => Navigation.NavigateTo($"/admin/edit-purchase/{id}");
+
+    private async Task OnCategoryChanged(ChangeEventArgs e)
+    {
+        var val = e?.Value?.ToString();
+        if (Guid.TryParse(val, out var gid)) selectedCategoryId = gid; else selectedCategoryId = null;
+        ApplyFilters();
+        await Task.CompletedTask;
+    }
+
+    private void ApplyFilters()
+    {
+        IEnumerable<PurchaseDto> q = AllPurchases;
+        if (!string.IsNullOrWhiteSpace(SearchTerm))
+        {
+            var s = SearchTerm.Trim();
+            var pid = Products.Where(p => p.Name.Contains(s, StringComparison.OrdinalIgnoreCase) ).Select(p => p.Id).ToHashSet();
+            q = q.Where(p => pid.Contains(p.ProductId) || p.SKU.Contains(s, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (selectedCategoryId.HasValue && selectedCategoryId != Guid.Empty)
+        {
+            q = q.Where(p => p.CategoryId == selectedCategoryId.Value);
+        }
+
+        FilteredPurchases = q.ToList();
+        Purchased = FilteredPurchases;
+    }
+
+    private void ConfirmDelete(Guid id)
+    {
+        SelectedDeleteId = id;
+        _ = JSInvokeShowDelete();
+    }
+
+    private async Task JSInvokeShowDelete()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("eval", "$('#delete-modal').modal('show');");
+        }
+        catch { }
+    }
+
+    private async Task DeleteProduct(Guid id)
+    {
+        try
+        {
+            var res = await ApiClient.DeleteAsync($"/api/purchases/{id}");
+            if (res.Success)
+            {
+                ToastService.ShowSuccess("Product Purchase deleted");
+                await LoadProductsAsync();
+            }
+            else
+            {
+                ToastService.ShowError(res.Message ?? "Failed to delete purchase");
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError("Error: " + ex.Message);
+        }
+    }
+}

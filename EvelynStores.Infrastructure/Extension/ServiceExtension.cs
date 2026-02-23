@@ -33,6 +33,8 @@ public static class ServiceExtension
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<ISubCategoryRepository, SubCategoryRepository>();
         services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddScoped<IPurchaseRepository, PurchaseRepository>();
+            services.AddScoped<IProductLevelRepository, ProductLevelRepository>();
 
         return services;
     }
@@ -45,6 +47,9 @@ public static class ServiceExtension
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<ISubCategoryService, SubCategoryService>();
         services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<IPurchaseService, PurchaseService>();
+            services.AddScoped<IProductLevelService, ProductLevelService>();
+            services.AddScoped<IProductLevelRepository, ProductLevelRepository>();
 
         return services;
     }
