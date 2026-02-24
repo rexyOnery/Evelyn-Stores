@@ -21,10 +21,10 @@ public class ProductDto
     public string Unit { get; set; } = string.Empty;
 
     //[Range(0, int.MaxValue, ErrorMessage = "Quantity must be a positive number")]
-    //public int Quantity { get; set; }
+    public int Quantity { get; set; }
 
     //[Range(0, double.MaxValue, ErrorMessage = "Price must be a positive number")]
-    //public decimal Price { get; set; }
+    public decimal Price { get; set; }
 
     public string ImageUrl { get; set; } = string.Empty;
     public string CreatedBy { get; set; } = string.Empty;

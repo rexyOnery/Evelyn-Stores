@@ -1,442 +1,551 @@
 ﻿@page "/admin/category-list"
 @using EvelynStores.Core.DTOs
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Text.Json
+@using System.Net.Http.Headers
+@using EvelynStores.Web.Components.Pages.Admin
 @inject IEvelynPhilApiHttpClient ApiClient
 @inject IJSRuntime JS
 
 <PageTitle>AdminCategory</PageTitle>
 
 <div class="content">
-	<div class="page-header">
-		<div class="add-item d-flex">
-			<div class="page-title">
-				<h4 class="fw-bold">Category</h4>
-				<h6>Manage your categories</h6>
-			</div>
-		</div>
-		<ul class="table-top-head">
-			<li>
-				<a data-bs-toggle="tooltip" data-bs-placement="top" title="Pdf"><img src="assets/img/icons/pdf.svg" alt="img"></a>
-			</li>
-			<li>
-				<a data-bs-toggle="tooltip" data-bs-placement="top" title="Excel"><img src="assets/img/icons/excel.svg" alt="img"></a>
-			</li>
-			<li>
-				<a data-bs-toggle="tooltip" data-bs-placement="top" title="Refresh" @onclick="LoadCategories"><i class="ti ti-refresh"></i></a>
-			</li>
-			<li>
-				<a data-bs-toggle="tooltip" data-bs-placement="top" title="Collapse" id="collapse-header"><i class="ti ti-chevron-up"></i></a>
-			</li>
-		</ul>
-		<div class="page-btn">
-			<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add-category"><i class="ti ti-circle-plus me-1"></i>Add Category</button>
-		</div>
-	</div>
+    <div class="page-header">
+        <div class="add-item d-flex">
+            <div class="page-title">
+                <h4 class="fw-bold">Category</h4>
+                <h6>Manage your categories</h6>
+            </div>
+        </div>
+        <ul class="table-top-head">
 
-	<div class="mt-3">
-		@if (!string.IsNullOrEmpty(successMessage))
-		{
-			<div class="alert alert-success alert-dismissible fade show" role="alert">
-				@successMessage
-				<button type="button" class="btn-close" aria-label="Close" @onclick="() => ClearMessages()"></button>
-			</div>
-		}
-		@if (!string.IsNullOrEmpty(errorMessage))
-		{
-			<div class="alert alert-danger alert-dismissible fade show" role="alert">
-				@errorMessage
-				<button type="button" class="btn-close" aria-label="Close" @onclick="() => ClearMessages()"></button>
-			</div>
-		}
-	</div>
+            <li>
+                <a data-bs-toggle="tooltip" data-bs-placement="top" title="Refresh" @onclick="LoadCategories"><i class="ti ti-refresh"></i></a>
+            </li>
+            <li>
+                <a data-bs-toggle="tooltip" data-bs-placement="top" title="Collapse" id="collapse-header"><i class="ti ti-chevron-up"></i></a>
+            </li>
+        </ul>
+        <div class="page-btn">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add-category"><i class="ti ti-circle-plus me-1"></i>Add Category</button>
+        </div>
+    </div>
 
-	<div class="card">
-		<div class="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3">
-			<div class="search-set">
-				<div class="search-input input-icon-start">
-					<span class="btn-searchset"><i class="ti ti-search fs-14 feather-search"></i></span>
-					<input class="form-control" placeholder="Search categories..." @bind="searchTerm" @bind:event="oninput" />
-				</div>
-			</div>
-			<div class="d-flex table-dropdown my-xl-auto right-content align-items-center flex-wrap row-gap-3">
-				<div class="dropdown me-2">
-					<button class="dropdown-toggle btn btn-white btn-md d-inline-flex align-items-center" type="button" data-bs-toggle="dropdown">
-						@statusFilter
-					</button>
-					<ul class="dropdown-menu  dropdown-menu-end p-3">
-						<li><button class="dropdown-item rounded-1" @onclick='() => SetStatusFilter("All")'>All</button></li>
-						<li><button class="dropdown-item rounded-1" @onclick='() => SetStatusFilter("Active")'>Active</button></li>
-						<li><button class="dropdown-item rounded-1" @onclick='() => SetStatusFilter("Inactive")'>Inactive</button></li>
-					</ul>
-				</div>
-			</div>
-		</div>
+    <div class="mt-3">
+        @if (!string.IsNullOrEmpty(successMessage))
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                @successMessage
+                <button type="button" class="btn-close" aria-label="Close" @onclick="() => ClearMessages()"></button>
+            </div>
+        }
 
-		<div class="card-body p-0">
-			<div class="table-responsive">
-				<table class="table datatable">
-					<thead class="thead-light">
-						<tr>
-							<th class="no-sort">
-								<label class="checkboxs">
-									<input type="checkbox" id="select-all">
-									<span class="checkmarks"></span>
-								</label>
-							</th>
-							<th>Category</th>
-							<th>Category slug</th>
-							<th>Created On</th>
-							<th>Status</th>
-							<th class="no-sort"></th>
-						</tr>
-					</thead>
-					<tbody>
-						@foreach (var c in FilteredCategories)
-						{
-							<tr>
-								<td>
-									<label class="checkboxs">
-										<input type="checkbox">
-										<span class="checkmarks"></span>
-									</label>
-								</td>
-								<td><span class="text-gray-9">@c.Name</span></td>
-								<td>@c.Slug</td>
-								<td>@c.CreatedAt.ToString("dd MMM yyyy")</td>
-								<td><span class="badge @(c.IsActive ? "bg-success" : "bg-danger") fw-medium fs-10">@(c.IsActive ? "Active" : "Inactive")</span></td>
-								<td class="action-table-data">
-									<div class="edit-delete-action">
-										<button type="button" class="me-2 p-2 btn btn-link" title="Edit" @onclick="() => OpenEdit(c)">
-											<i data-feather="edit" class="bi bi-folder2-open"></i>
-										</button>
-										<button data-bs-toggle="modal" data-bs-target="#delete-modal" type="button" class="p-2 btn btn-link text-danger" title="Delete" @onclick="() => OpenDelete(c.Id)">
-											<i data-feather="trash-2" class="bi bi-trash3"></i>
-										</button>
-									</div>
 
-								</td>
-							</tr>
-						}
-					</tbody>
-				</table>
-			</div>
-		</div>
-	</div>
-	<!-- /product list -->
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                @errorMessage
+                <button type="button" class="btn-close" aria-label="Close" @onclick="() => ClearMessages()"></button>
+            </div>
+        }
+    </div>
+
+
+    <div class="card">
+        <div class="card-header d-flex align-items-center justify-content-between flex-wrap row-gap-3">
+            <div class="search-set">
+                <div class="search-input input-icon-start">
+                    <span class="btn-searchset"><i class="ti ti-search fs-14 feather-search"></i></span>
+                    <input class="form-control" placeholder="Search categories..." @bind="searchTerm" @bind:event="oninput" />
+                </div>
+            </div>
+            <div class="d-flex table-dropdown my-xl-auto right-content align-items-center flex-wrap row-gap-3">
+                <div class="dropdown me-2">
+                    <button class="dropdown-toggle btn btn-white btn-md d-inline-flex align-items-center" type="button" data-bs-toggle="dropdown">
+                        @statusFilter
+                    </button>
+                    <ul class="dropdown-menu  dropdown-menu-end p-3">
+                        <li><button class="dropdown-item rounded-1" @onclick='() => SetStatusFilter("All")'>All</button></li>
+                        <li><button class="dropdown-item rounded-1" @onclick='() => SetStatusFilter("Active")'>Active</button></li>
+                        <li><button class="dropdown-item rounded-1" @onclick='() => SetStatusFilter("Inactive")'>Inactive</button></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table datatable">
+                    <thead class="thead-light">
+                        <tr>
+                            
+                            <th>Category</th>
+                            <th>Category slug</th>
+                            <th>Created On</th>
+                            <th>Status</th>
+                            <th class="no-sort"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var c in FilteredCategories)
+                        {
+                            <tr>
+                                
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <a href="javascript:void(0);" class="avatar avatar-md me-2">
+                                            <img src="@(string.IsNullOrEmpty(c.ImageUrl) ? "assets/img/products/stock-img-01.png" : c.ImageUrl)" alt="@c.Name">
+                                        </a>
+                                        <a href="javascript:void(0);">@c.Name</a>
+                                    </div>
+                                </td>
+                                <td>@c.Slug</td>
+                                <td>@c.CreatedAt.ToString("dd MMM yyyy")</td>
+                                <td><span class="badge @(c.IsActive ? "bg-success" : "bg-danger") fw-medium fs-10">@(c.IsActive ? "Active" : "Inactive")</span></td>
+                                <td class="action-table-data">
+                                    <div class="edit-delete-action">
+                                        <button type="button" class="me-2 p-2 btn btn-link" title="Edit" @onclick="() => OpenEdit(c)">
+                                            <i data-feather="edit" class="bi bi-folder2-open"></i>
+                                        </button>
+                                        <button data-bs-toggle="modal" data-bs-target="#delete-modal" type="button" class="p-2 btn btn-link text-danger" title="Delete" @onclick="() => OpenDelete(c.Id)">
+                                            <i data-feather="trash-2" class="bi bi-trash3"></i>
+                                        </button>
+                                    </div>
+
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- /product list -->
 </div>
 
 <!-- Add Category Modal -->
 <div class="modal fade" id="add-category" tabindex="-1" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered">
-		<div class="modal-content">
-			<div class="modal-header">
-				<div class="page-title"><h4>Add Category</h4></div>
-				<button type="button" class="close bg-danger text-white fs-16" data-bs-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">&times;</span>
-				</button>
-			</div>
-			<EditForm Model="@AddModel" OnValidSubmit="HandleAddSubmit" OnInvalidSubmit="HandleAddInvalidSubmit" FormName="addCategoryForm">
-				<DataAnnotationsValidator />
-				<div class="modal-body">
-					<ValidationSummary />
-					<div class="mb-3">
-						<label class="form-label">Category<span class="text-danger ms-1">*</span></label>
-						<InputText class="form-control" @bind-Value="AddModel.Name" @oninput="OnAddNameChanged" />
-						<ValidationMessage For="@(() => AddModel.Name)" />
-					</div>
-					<div class="mb-3" style="display:none">
-						<label class="form-label">Slug</label>
-						<InputText class="form-control" @bind-Value="AddModel.Slug" disabled />
-						<ValidationMessage For="@(() => AddModel.Slug)" />
-					</div>
-					<div class="mb-0">
-						<div class="status-toggle modal-status d-flex justify-content-between align-items-center">
-							<span class="status-label">Status</span>
-							<InputCheckbox id="cat-isactive" class="check" @bind-Value="AddModel.IsActive" />
-							<label for="cat-isactive" class="checktoggle"></label>
-						</div>
-					</div>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn me-2 btn-secondary" data-bs-dismiss="modal">Cancel</button>
-					<button type="submit" class="btn btn-primary">Add Category</button>
-				</div>
-			</EditForm>
-		</div>
-	</div>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="page-title"><h4>Add Category</h4></div>
+                <button type="button" class="close bg-danger text-white fs-16" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <EditForm Model="@AddModel" OnValidSubmit="HandleAddSubmit" OnInvalidSubmit="HandleAddInvalidSubmit" FormName="addCategoryForm">
+                <DataAnnotationsValidator />
+                <div class="modal-body">
+                    <ValidationSummary />
+                    <div class="mb-3">
+                        <label class="form-label">Category<span class="text-danger ms-1">*</span></label>
+                        <InputText class="form-control" @bind-Value="AddModel.Name" @oninput="OnAddNameChanged" />
+                        <ValidationMessage For="@(() => AddModel.Name)" />
+                    </div>
+                    <div class="mb-3" style="display:none">
+                        <label class="form-label">Slug</label>
+                        <InputText class="form-control" @bind-Value="AddModel.Slug" disabled />
+                        <ValidationMessage For="@(() => AddModel.Slug)" />
+                    </div>
+                    <div class="mb-3">
+                        <div class="text-editor add-list add">
+                            <div class="col-lg-12">
+                                <div class="add-choosen">
+                                    <div class="mb-3">
+                                        <div class="image-upload image-upload-two">
+                                            <InputFile OnChange="OnInputFileChanged" />
+                                            <div class="image-uploads">
+                                                <i data-feather="plus-circle" class="plus-down-add me-0"></i>
+                                                <h4>Add Images</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="phone-img">
+                                        @if (!string.IsNullOrEmpty(AddPreviewUrl))
+                                        {
+                                            <img src="@AddPreviewUrl" alt="image">
+                                        }
+                                        else
+                                        {
+                                            <img src="assets/img/products/phone-add-2.png" alt="image">
+                                        }
+                                        <a href="javascript:void(0);"><i data-feather="x" class="x-square-add remove-product" @onclick="ClearPrimaryImage"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-0">
+                        <div class="status-toggle modal-status d-flex justify-content-between align-items-center">
+                            <span class="status-label">Status</span>
+                            <InputCheckbox id="cat-isactive" class="check" @bind-Value="AddModel.IsActive" />
+                            <label for="cat-isactive" class="checktoggle"></label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn me-2 btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Category</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
 </div>
 <!-- /Add Category Modal -->
-
 <!-- Edit Category Modal -->
 <div class="modal fade" id="edit-category" tabindex="-1" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered">
-		<div class="modal-content">
-			<div class="modal-header">
-				<div class="page-title"><h4>Edit Category</h4></div>
-				<button type="button" class="close bg-danger text-white fs-16" data-bs-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">&times;</span>
-				</button>
-			</div>
-			<EditForm Model="@EditModel" OnValidSubmit="HandleEditSubmit" OnInvalidSubmit="HandleEditInvalidSubmit" FormName="editCategoryForm">
-				<DataAnnotationsValidator />
-				<div class="modal-body">
-					<ValidationSummary />
-					<div class="mb-3">
-						<label class="form-label">Category<span class="text-danger ms-1">*</span></label>
-						<InputText class="form-control" @bind-Value="EditModel.Name" @oninput="OnEditNameChanged" />
-						<ValidationMessage For="@(() => EditModel.Name)" />
-					</div>
-					<div class="mb-3" style="display:none">
-						<label class="form-label">Slug</label>
-						<InputText class="form-control" @bind-Value="EditModel.Slug" />
-						<ValidationMessage For="@(() => EditModel.Slug)" />
-					</div>
-					<div class="mb-0">
-						<div class="status-toggle modal-status d-flex justify-content-between align-items-center">
-							<span class="status-label">Status</span>
-							<InputCheckbox id="edit-cat-isactive" class="check" @bind-Value="EditModel.IsActive" />
-							<label for="edit-cat-isactive" class="checktoggle"></label>
-						</div>
-					</div>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn me-2 btn-secondary" data-bs-dismiss="modal">Cancel</button>
-					<button type="submit" class="btn btn-primary">Save Changes</button>
-				</div>
-			</EditForm>
-		</div>
-	</div>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="page-title"><h4>Edit Category</h4></div>
+                <button type="button" class="close bg-danger text-white fs-16" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <EditForm Model="@EditModel" OnValidSubmit="HandleEditSubmit" OnInvalidSubmit="HandleEditInvalidSubmit" FormName="editCategoryForm">
+                <DataAnnotationsValidator />
+                <div class="modal-body">
+                    <ValidationSummary />
+                    <div class="mb-3">
+                        <label class="form-label">Category<span class="text-danger ms-1">*</span></label>
+                        <InputText class="form-control" @bind-Value="EditModel.Name" @oninput="OnEditNameChanged" />
+                        <ValidationMessage For="@(() => EditModel.Name)" />
+                    </div>
+                    <div class="mb-3" style="display:none">
+                        <label class="form-label">Slug</label>
+                        <InputText class="form-control" @bind-Value="EditModel.Slug" />
+                        <ValidationMessage For="@(() => EditModel.Slug)" />
+                    </div>
+                    <div class="mb-3">
+                        <div class="text-editor add-list add">
+                            <div class="col-lg-12">
+                                <div class="add-choosen">
+                                    <div class="mb-3">
+                                        <div class="image-upload image-upload-two">
+                                            <InputFile OnChange="OnInputFileChanged" />
+                                            <div class="image-uploads">
+                                                <i data-feather="plus-circle" class="plus-down-add me-0"></i>
+                                                <h4>Add Images</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="phone-img">
+                                        @if (!string.IsNullOrEmpty(AddPreviewUrl))
+                                        {
+                                            <img src="@AddPreviewUrl" alt="image">
+                                        }
+                                        else
+                                        {
+                                            <img src="assets/img/products/phone-add-2.png" alt="image">
+                                        }
+                                        <a href="javascript:void(0);"><i data-feather="x" class="x-square-add remove-product" @onclick="ClearPrimaryImage"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-0">
+                        <div class="status-toggle modal-status d-flex justify-content-between align-items-center">
+                            <span class="status-label">Status</span>
+                            <InputCheckbox id="edit-cat-isactive" class="check" @bind-Value="EditModel.IsActive" />
+                            <label for="edit-cat-isactive" class="checktoggle"></label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn me-2 btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
 </div>
 <!-- /Edit Category Modal -->
 
 <DeleteModal EntityId="SelectedCategoryForDelete" Entity="Category" OnConfirm="HandleDeleteConfirmed" />
 
 @code {
-	private List<CategoryDto> CategoryList { get; set; } = new();
-	private string? errorMessage;
-	private string? successMessage;
-	private bool isLoading;
+    private List<CategoryDto> CategoryList { get; set; } = new();
+    private string? errorMessage;
+    private string? successMessage;
+    private bool isLoading;
 
-	private CategoryDto AddModel { get; set; } = new CategoryDto();
-	private CategoryDto EditModel { get; set; } = new CategoryDto();
-	private CategoryDto? SelectedCategoryForEdit { get; set; }
-	private Guid? SelectedCategoryForDelete { get; set; }
+    private CategoryDto AddModel { get; set; } = new CategoryDto();
+    private CategoryDto EditModel { get; set; } = new CategoryDto();
+    private CategoryDto? SelectedCategoryForEdit { get; set; }
+    private Guid? SelectedCategoryForDelete { get; set; }
 
-	private string searchTerm = string.Empty;
-	private string statusFilter = "All";
+    // Image upload / preview fields (replicated from AddProduct)
+    // image upload state (match AdminBrand implementation)
+    private IBrowserFile? AddImageFile;
+    private IBrowserFile? EditImageFile;
+    private string? AddPreviewUrl;
+    private string? EditPreviewUrl;
+    private string PrimaryImage { get; set; } = string.Empty; // stored URL returned from server
+    private string PrimaryPreviewUrl { get; set; } = string.Empty; // data url for preview
+    private const long MaxFileBytes = 5 * 1024 * 1024; // 5 MB
 
-	private IEnumerable<CategoryDto> FilteredCategories =>
-		CategoryList.Where(c =>
-			(string.IsNullOrWhiteSpace(searchTerm) || (c.Name?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) == true) || (c.Slug?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) == true))
-			&& (statusFilter == "All" || (statusFilter == "Active" && c.IsActive) || (statusFilter == "Inactive" && !c.IsActive))
-		).ToList();
+    private string searchTerm = string.Empty;
+    private string statusFilter = "All";
 
-	protected override async Task OnInitializedAsync()
-	{
-		await LoadCategories();
-	}
+    private IEnumerable<CategoryDto> FilteredCategories =>
+        CategoryList.Where(c =>
+            (string.IsNullOrWhiteSpace(searchTerm) || (c.Name?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) == true) || (c.Slug?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) == true))
+            && (statusFilter == "All" || (statusFilter == "Active" && c.IsActive) || (statusFilter == "Inactive" && !c.IsActive))
+        ).ToList();
 
-	private void SetStatusFilter(string s)
-	{
-		statusFilter = s;
-	}
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCategories();
+    }
 
-	private async Task LoadCategories()
-	{
-		errorMessage = null;
-		isLoading = true;
-		try
-		{
-			var resp = await ApiClient.GetAsync<List<CategoryDto>>("/api/categories");
-			if (resp != null && resp.Success)
-			{
-				CategoryList = resp.Data ?? new List<CategoryDto>();
-			}
-			else
-			{
-				CategoryList = new List<CategoryDto>();
-				errorMessage = resp?.Message ?? "Failed to load categories from server.";
-				ShowMessage(errorMessage, isSuccess: false);
-			}
-		}
-		catch (Exception)
-		{
-			errorMessage = "Failed to load categories from server.";
-			CategoryList = new List<CategoryDto>();
-			ShowMessage(errorMessage, isSuccess: false);
-		}
-		finally
-		{
-			isLoading = false;
-		}
-	}
+    private void SetStatusFilter(string s)
+    {
+        statusFilter = s;
+    }
 
-	private void OnAddNameChanged(ChangeEventArgs e)
-	{
-		AddModel.Slug = GenerateSlug(AddModel.Name);
-		StateHasChanged();
-	}
+    private async Task LoadCategories()
+    {
+        errorMessage = null;
+        isLoading = true;
+        try
+        {
+            var resp = await ApiClient.GetAsync<List<CategoryDto>>("/api/categories");
+            if (resp != null && resp.Success)
+            {
+                CategoryList = resp.Data ?? new List<CategoryDto>();
+            }
+            else
+            {
+                CategoryList = new List<CategoryDto>();
+                errorMessage = resp?.Message ?? "Failed to load categories from server.";
+                ShowMessage(errorMessage, isSuccess: false);
+            }
+        }
+        catch (Exception)
+        {
+            errorMessage = "Failed to load categories from server.";
+            CategoryList = new List<CategoryDto>();
+            ShowMessage(errorMessage, isSuccess: false);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
 
-	private void OnEditNameChanged(ChangeEventArgs e)
-	{
-		EditModel.Slug = GenerateSlug(EditModel.Name);
-		StateHasChanged();
-	}
+    private void OnAddNameChanged(ChangeEventArgs e)
+    {
+        AddModel.Slug = GenerateSlug(AddModel.Name);
+        StateHasChanged();
+    }
 
-	private string GenerateSlug(string? value)
-	{
-		if (string.IsNullOrWhiteSpace(value)) return string.Empty;
-		var slug = System.Text.RegularExpressions.Regex.Replace(value.Trim().ToLowerInvariant(), "[^a-z0-9]+", "-");
-		slug = slug.Trim('-');
-		return slug;
-	}
+    private void OnEditNameChanged(ChangeEventArgs e)
+    {
+        EditModel.Slug = GenerateSlug(EditModel.Name);
+        StateHasChanged();
+    }
 
-	private async Task HandleAddInvalidSubmit(EditContext context)
-	{
-		ShowMessage("Please correct validation errors and try again.", isSuccess: false);
-	}
+    private string GenerateSlug(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return string.Empty;
+        var slug = System.Text.RegularExpressions.Regex.Replace(value.Trim().ToLowerInvariant(), "[^a-z0-9]+", "-");
+        slug = slug.Trim('-');
+        return slug;
+    }
 
-	private async Task HandleEditInvalidSubmit(EditContext context)
-	{
-		ShowMessage("Please correct validation errors and try again.", isSuccess: false);
-	}
+    private async Task HandleAddInvalidSubmit(EditContext context)
+    {
+        ShowMessage("Please correct validation errors and try again.", isSuccess: false);
+    }
 
-	private async Task HandleAddSubmit()
-	{
-		if (CategoryList.Any(c => string.Equals(c.Name?.Trim(), AddModel.Name?.Trim(), StringComparison.OrdinalIgnoreCase)))
-		{
-			ShowMessage("A category with this name already exists.", isSuccess: false);
-			return;
-		}
+    private async Task HandleEditInvalidSubmit(EditContext context)
+    {
+        ShowMessage("Please correct validation errors and try again.", isSuccess: false);
+    }
 
-		AddModel.CreatedAt = DateTime.UtcNow;
-		AddModel.Slug = GenerateSlug(AddModel.Name);
-		CategoryList.Insert(0, AddModel);
-		StateHasChanged();
+    private async Task HandleAddSubmit()
+    {
+        if (CategoryList.Any(c => string.Equals(c.Name?.Trim(), AddModel.Name?.Trim(), StringComparison.OrdinalIgnoreCase)))
+        {
+            ShowMessage("A category with this name already exists.", isSuccess: false);
+            return;
+        }
 
-		try
-		{
-			var resp = await ApiClient.PostAsync<CategoryDto>("/api/categories", AddModel);
-			if (resp != null && resp.Success)
-			{
-				var created = resp.Data ?? AddModel;
-				var idx = CategoryList.FindIndex(c => c.Id == AddModel.Id || (c.Name == AddModel.Name && c.Slug == AddModel.Slug && c.CreatedAt == AddModel.CreatedAt));
-				if (idx >= 0) CategoryList[idx] = created;
-				ShowMessage("Category added", isSuccess: true);
-			}
-			else
-			{
-				CategoryList.RemoveAll(c => c.Name == AddModel.Name && c.Slug == AddModel.Slug && c.CreatedAt == AddModel.CreatedAt);
-				errorMessage = resp?.Message ?? "Failed to create category.";
-				ShowMessage(errorMessage, isSuccess: false);
-			}
-		}
-		catch
-		{
-			CategoryList.RemoveAll(c => c.Name == AddModel.Name && c.Slug == AddModel.Slug && c.CreatedAt == AddModel.CreatedAt);
-			errorMessage = "Failed to create category.";
-			ShowMessage(errorMessage, isSuccess: false);
-		}
-		finally
-		{
-			try { await JS.InvokeVoidAsync("eval", "$('#add-category').modal('hide');"); } catch { }
-			AddModel = new CategoryDto();
-			StateHasChanged();
-		}
-	}
+        AddModel.CreatedAt = DateTime.UtcNow;
+        AddModel.Slug = GenerateSlug(AddModel.Name);
+        CategoryList.Insert(0, AddModel);
+        StateHasChanged();
 
-	private async Task OpenEdit(CategoryDto category)
-	{
-		SelectedCategoryForEdit = category;
-		EditModel = new CategoryDto
-		{
-			Id = category.Id,
-			Name = category.Name,
-			Slug = category.Slug,
-			IsActive = category.IsActive,
-			CreatedAt = category.CreatedAt
-		};
-		try { await JS.InvokeVoidAsync("eval", "$('#edit-category').modal('show');"); } catch { }
-	}
+        try
+        {
+            // if an image file was selected, upload it first and set AddModel.ImageUrl to returned path
+            // use base64 image payload just like AddProduct: PrimaryImage carries data URL
+            if (!string.IsNullOrEmpty(PrimaryImage))
+            {
+                AddModel.ImageUrl = PrimaryImage;
+            }
 
-	private async Task HandleEditSubmit()
-	{
-		if (EditModel == null) return;
-		if (CategoryList.Any(c => c.Id != EditModel.Id && string.Equals(c.Name?.Trim(), EditModel.Name?.Trim(), StringComparison.OrdinalIgnoreCase)))
-		{
-			ShowMessage("A category with this name already exists.", isSuccess: false);
-			return;
-		}
+            var resp = await ApiClient.PostAsync<CategoryDto>("/api/categories", AddModel);
+            if (resp != null && resp.Success)
+            {
+                var created = resp.Data ?? AddModel;
+                var idx = CategoryList.FindIndex(c => c.Id == AddModel.Id || (c.Name == AddModel.Name && c.Slug == AddModel.Slug && c.CreatedAt == AddModel.CreatedAt));
+                if (idx >= 0) CategoryList[idx] = created;
+                ShowMessage("Category added", isSuccess: true);
+            }
+            else
+            {
+                CategoryList.RemoveAll(c => c.Name == AddModel.Name && c.Slug == AddModel.Slug && c.CreatedAt == AddModel.CreatedAt);
+                errorMessage = resp?.Message ?? "Failed to create category.";
+                ShowMessage(errorMessage, isSuccess: false);
+            }
+        }
+        catch
+        {
+            CategoryList.RemoveAll(c => c.Name == AddModel.Name && c.Slug == AddModel.Slug && c.CreatedAt == AddModel.CreatedAt);
+            errorMessage = "Failed to create category.";
+            ShowMessage(errorMessage, isSuccess: false);
+        }
+        finally
+        {
+            try { await JS.InvokeVoidAsync("eval", "$('#add-category').modal('hide');"); } catch { }
+            AddModel = new CategoryDto();
+            StateHasChanged();
+        }
+    }
 
-		try
-		{
-			EditModel.Slug = GenerateSlug(EditModel.Name);
-			var resp = await ApiClient.PutAsync<CategoryDto>($"/api/categories/{EditModel.Id}", EditModel);
-			if (resp != null && resp.Success)
-			{
-				var idx = CategoryList.FindIndex(c => c.Id == EditModel.Id);
-				if (idx >= 0) CategoryList[idx] = resp.Data ?? EditModel;
-				ShowMessage("Category updated", isSuccess: true);
-			}
-			else
-			{
-				errorMessage = resp?.Message ?? "Failed to update category.";
-				ShowMessage(errorMessage, isSuccess: false);
-			}
-		}
-		catch
-		{
-			errorMessage = "Failed to update category.";
-			ShowMessage(errorMessage, isSuccess: false);
-		}
-		finally
-		{
-			try { await JS.InvokeVoidAsync("eval", "$('#edit-category').modal('hide');"); } catch { }
-		}
-	}
+    private async Task OpenEdit(CategoryDto category)
+    {
+        SelectedCategoryForEdit = category;
+        EditModel = new CategoryDto
+        {
+            Id = category.Id,
+            Name = category.Name,
+            Slug = category.Slug,
+            IsActive = category.IsActive,
+            CreatedAt = category.CreatedAt
+        };
+        try { await JS.InvokeVoidAsync("eval", "$('#edit-category').modal('show');"); } catch { }
+    }
 
-	private async Task OpenDelete(Guid id)
-	{
-		SelectedCategoryForDelete = id;
-		try { await JS.InvokeVoidAsync("eval", "$('#delete-modal').modal('show');"); } catch { }
-	}
+    private async Task HandleEditSubmit()
+    {
+        if (EditModel == null) return;
+        if (CategoryList.Any(c => c.Id != EditModel.Id && string.Equals(c.Name?.Trim(), EditModel.Name?.Trim(), StringComparison.OrdinalIgnoreCase)))
+        {
+            ShowMessage("A category with this name already exists.", isSuccess: false);
+            return;
+        }
 
-	private async Task HandleDeleteConfirmed(Guid id)
-	{
-		try
-		{
-			var resp = await ApiClient.DeleteAsync($"/api/categories/{id}");
-			if (resp != null && resp.Success)
-			{
-				CategoryList.RemoveAll(c => c.Id == id);
-				ShowMessage("Category deleted", isSuccess: true);
-			}
-			else
-			{
-				errorMessage = resp?.Message ?? "Failed to delete category.";
-				ShowMessage(errorMessage, isSuccess: false);
-			}
-		}
-		catch
-		{
-			errorMessage = "Failed to delete category.";
-			ShowMessage(errorMessage, isSuccess: false);
-		}
-	}
+        try
+        {
+             // if an image file was selected, upload it first and set AddModel.ImageUrl to returned path
+            // use base64 image payload just like AddProduct: PrimaryImage carries data URL
+            if (!string.IsNullOrEmpty(PrimaryImage))
+            {
+                EditModel.ImageUrl = PrimaryImage;
+            }
 
-	private void ClearMessages()
-	{
-		successMessage = null;
-		errorMessage = null;
-	}
+            EditModel.Slug = GenerateSlug(EditModel.Name);
+            var resp = await ApiClient.PutAsync<CategoryDto>($"/api/categories/{EditModel.Id}", EditModel);
+            if (resp != null && resp.Success)
+            {
+                var idx = CategoryList.FindIndex(c => c.Id == EditModel.Id);
+                if (idx >= 0) CategoryList[idx] = resp.Data ?? EditModel;
+                ShowMessage("Category updated", isSuccess: true);
+            }
+            else
+            {
+                errorMessage = resp?.Message ?? "Failed to update category.";
+                ShowMessage(errorMessage, isSuccess: false);
+            }
+        }
+        catch
+        {
+            errorMessage = "Failed to update category.";
+            ShowMessage(errorMessage, isSuccess: false);
+        }
+        finally
+        {
+            try { await JS.InvokeVoidAsync("eval", "$('#edit-category').modal('hide');"); } catch { }
+        }
+    }
 
-	private async void ShowMessage(string? message, bool isSuccess)
-	{
-		if (isSuccess) successMessage = message;
-		else errorMessage = message;
-		StateHasChanged();
+    private async Task OpenDelete(Guid id)
+    {
+        SelectedCategoryForDelete = id;
+        try { await JS.InvokeVoidAsync("eval", "$('#delete-modal').modal('show');"); } catch { }
+    }
 
-		await Task.Delay(4000);
-		ClearMessages();
-		StateHasChanged();
-	}
+    private async Task HandleDeleteConfirmed(Guid id)
+    {
+        try
+        {
+            var resp = await ApiClient.DeleteAsync($"/api/categories/{id}");
+            if (resp != null && resp.Success)
+            {
+                CategoryList.RemoveAll(c => c.Id == id);
+                ShowMessage("Category deleted", isSuccess: true);
+            }
+            else
+            {
+                errorMessage = resp?.Message ?? "Failed to delete category.";
+                ShowMessage(errorMessage, isSuccess: false);
+            }
+        }
+        catch
+        {
+            errorMessage = "Failed to delete category.";
+            ShowMessage(errorMessage, isSuccess: false);
+        }
+    }
+
+    private void ClearMessages()
+    {
+        successMessage = null;
+        errorMessage = null;
+    }
+
+    private async void ShowMessage(string? message, bool isSuccess)
+    {
+        if (isSuccess) successMessage = message;
+        else errorMessage = message;
+        StateHasChanged();
+
+        await Task.Delay(4000);
+        ClearMessages();
+        StateHasChanged();
+    }
+
+    // Helper for file input via InputFile component if used in future
+    private async Task OnInputFileChanged(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        AddImageFile = file;
+        await UploadAndPreview(file);
+    }
+
+    private async Task UploadAndPreview(IBrowserFile file)
+    {
+        // keep for compatibility but not used; prefer UploadImageAsync flow
+        if (file == null) return;
+        using var ms = new MemoryStream();
+        await file.OpenReadStream(MaxFileBytes).CopyToAsync(ms);
+        var bytes = ms.ToArray();
+        var base64 = Convert.ToBase64String(bytes);
+        PrimaryPreviewUrl = $"data:{file.ContentType};base64,{base64}";
+        // set both preview fields used in this component
+        AddPreviewUrl = PrimaryPreviewUrl;
+        PrimaryImage = PrimaryPreviewUrl;
+        ShowMessage("Image loaded and will be saved with category.", isSuccess: true);
+    }
+
+    private void ClearPrimaryImage()
+    {
+        PrimaryImage = string.Empty;
+        PrimaryPreviewUrl = string.Empty;
+        AddImageFile = null;
+        AddPreviewUrl = null;
+    }
 }

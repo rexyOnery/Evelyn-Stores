@@ -17,4 +17,8 @@ public class CategoryDto
     public bool IsActive { get; set; } = true;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    // optional image URL or base64 image data
+    public string ImageUrl { get; set; } = string.Empty;
+    // number of products in this category
+    public int ProductCount { get; set; }
 }

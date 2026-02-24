@@ -1,6 +1,7 @@
 using EvelynStores.Core.DTOs;
 using EvelynStores.Core.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using System.Linq;
 
 namespace EvelynStores.API.Controllers;
@@ -15,6 +16,8 @@ public class CategoriesController : ControllerBase
     {
         _categoryService = categoryService;
     }
+
+    // Note: We removed server-side file upload endpoint to prefer base64 in DTOs.
 
     [HttpGet]
     public async Task<IActionResult> GetAll()
@@ -40,8 +43,15 @@ public class CategoriesController : ControllerBase
             return BadRequest(EvelynPhilApiResponse.ErrorResponse("Validation failed.", 400, errors));
         }
 
-        var created = await _categoryService.CreateAsync(dto);
-        return StatusCode(201, EvelynPhilApiResponse<CategoryDto>.SuccessResponse(created, "Created", 201));
+        try
+        {
+            var created = await _categoryService.CreateAsync(dto);
+            return StatusCode(201, EvelynPhilApiResponse<CategoryDto>.SuccessResponse(created, "Created", 201));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, EvelynPhilApiResponse.ErrorResponse("Failed to create category.", 500, new List<string> { ex.Message }));
+        }
     }
 
     [HttpPut("{id}")]

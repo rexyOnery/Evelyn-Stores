@@ -1,1216 +1,603 @@
 ﻿@page "/" 
+@using System.Linq
+@using System.Net.Http.Json
+@using System.Collections.Generic
+@using EvelynStores.Core.DTOs
 @inject IJSRuntime JS
+@inject HttpClient Http
 <PageTitle>POS</PageTitle>
 
 <div class="row align-items-start pos-wrapper">
 
-	<!-- Products -->
-	<div class="col-md-12 col-lg-7 col-xl-8">
-		<div class="pos-categories tabs_wrapper pb-0">
-			<div class="card pos-button">
-				<div class="d-flex align-items-center flex-wrap">
-					<a href="javascript:void(0);" class="btn btn-teal btn-md mb-xs-3" data-bs-toggle="modal" data-bs-target="#orders"><i class="ti ti-shopping-cart me-1"></i>View Orders</a>
-					<a href="javascript:void(0);" class="btn btn-md btn-indigo" data-bs-toggle="modal" data-bs-target="#reset"><i class="ti ti-reload me-1"></i>Reset</a>
-					<a href="javascript:void(0);" class="btn btn-md btn-info" data-bs-toggle="modal" data-bs-target="#recents"><i class="ti ti-refresh-dot me-1"></i>Transaction</a>
-				</div>
-			</div>
-			<div class="d-flex align-items-center justify-content-between">
-				<h4 class="mb-3">Categories</h4>
-			</div>
-			<ul class="tabs owl-carousel pos-category">
-				<li id="all" class="active">
-					<a href="javascript:void(0);">
-						<img src="assets/img/products/pos-product-01.png" alt="Categories">
-					</a>
-					<h6><a href="javascript:void(0);">All Categories</a></h6>
-					<span>80 Items</span>
-				</li>
-				<li id="headphones">
-					<a href="javascript:void(0);">
-						<img src="assets/img/products/pos-product-08.png" alt="Categories">
-					</a>
-					<h6><a href="javascript:void(0);">Headphones</a></h6>
-					<span>4 Items</span>
-				</li>
-				<li id="shoes">
-					<a href="javascript:void(0);">
-						<img src="assets/img/products/pos-product-13.png" alt="Categories">
-					</a>
-					<h6><a href="javascript:void(0);">Shoes</a></h6>
-					<span>14 Items</span>
-				</li>
-				<li id="mobiles">
-					<a href="javascript:void(0);">
-						<img src="assets/img/products/pos-product-09.png" alt="Categories">
-					</a>
-					<h6><a href="javascript:void(0);">Mobiles</a></h6>
-					<span>7 Items</span>
-				</li>
-				<li id="watches">
-					<a href="javascript:void(0);">
-						<img src="assets/img/products/pos-product-11.png" alt="Categories">
-					</a>
-					<h6><a href="javascript:void(0);">Watches</a></h6>
-					<span>16 Items</span>
-				</li>
-				<li id="laptops">
-					<a href="javascript:void(0);">
-						<img src="assets/img/products/pos-product-12.png" alt="Categories">
-					</a>
-					<h6><a href="javascript:void(0);">Laptops</a></h6>
-					<span>18 Items</span>
-				</li>
-				<li id="allcategory">
-					<a href="javascript:void(0);">
-						<img src="assets/img/products/pos-product-06.png" alt="Categories">
-					</a>
-					<h6><a href="javascript:void(0);">All Categories</a></h6>
-					<span>80 Items</span>
-				</li>
-				<li id="headphone">
-					<a href="javascript:void(0);">
-						<img src="assets/img/products/pos-product-05.png" alt="Categories">
-					</a>
-					<h6><a href="javascript:void(0);">Headphones</a></h6>
-					<span>4 Items</span>
-				</li>
-				<li id="shoe">
-					<a href="javascript:void(0);">
-						<img src="assets/img/products/pos-product-04.png" alt="Categories">
-					</a>
-					<h6><a href="javascript:void(0);">Shoes</a></h6>
-					<span>14 Items</span>
-				</li>
-				<li id="mobile">
-					<a href="javascript:void(0);">
-						<img src="assets/img/products/pos-product-01.png" alt="Categories">
-					</a>
-					<h6><a href="javascript:void(0);">Mobiles</a></h6>
-					<span>7 Items</span>
-				</li>
-				<li id="watche">
-					<a href="javascript:void(0);">
-						<img src="assets/img/products/pos-product-11.png" alt="Categories">
-					</a>
-					<h6><a href="javascript:void(0);">Watches</a></h6>
-					<span>16 Items</span>
-				</li>
-				<li id="laptop">
-					<a href="javascript:void(0);">
-						<img src="assets/img/products/pos-product-02.png" alt="Categories">
-					</a>
-					<h6><a href="javascript:void(0);">Laptops</a></h6>
-					<span>18 Items</span>
-				</li>
-			</ul>
-			<div class="pos-products">
-				<div class="d-flex align-items-center justify-content-between">
-					<h4 class="mb-3">Products</h4>
-					<div class="input-icon-start pos-search position-relative mb-3">
-						<span class="input-icon-addon">
-							<i class="ti ti-search"></i>
-						</span>
-						<input type="text" class="form-control" placeholder="Search Product">
-					</div>
-				</div>
-				<div class="tabs_container">
-					<div class="tab_content active" data-tab="all">
-						<div class="row">
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-01.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Mobiles</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">IPhone 14 64GB</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>30 Pcs</span>
-										<p>$15800</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-02.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Computer</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">MacBook Pro</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>140 Pcs</span>
-										<p>$1000</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-03.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Watches</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Rolex Tribute V3</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>220 Pcs</span>
-										<p>$6800</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-04.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Shoes</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Red Nike Angelo</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>78 Pcs</span>
-										<p>$7800</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card active">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-05.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Headphones</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Airpod 2</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>47 Pcs</span>
-										<p>$5478</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-06.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Shoes</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Blue White OGR</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>54 Pcs</span>
-										<p>$987</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-07.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Laptop</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">IdeaPad Slim 5 Gen 7</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>74 Pcs</span>
-										<p>$1454</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-08.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Headphones</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">SWAGME</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>14 Pcs</span>
-										<p>$6587</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-09.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Watches</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Timex Black Silver</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>24 Pcs</span>
-										<p>$1457</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-10.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Computer</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Tablet 1.02 inch</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>14 Pcs</span>
-										<p>$4744</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-11.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Watches</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Fossil Pair Of 3 in 1 </a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>40 Pcs</span>
-										<p>$789</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-13.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Shoes</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Green Nike Fe</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>78 Pcs</span>
-										<p>$7847</p>
-									</div>
-								</div>
-							</div>
+    <!-- Products -->
+    <div class="col-md-12 col-lg-7 col-xl-8">
+        <div class="pos-categories tabs_wrapper pb-0">
+            <div class="card pos-button">
+                <div class="d-flex align-items-center flex-wrap">
+                    <a href="javascript:void(0);" class="btn btn-teal btn-md mb-xs-3" data-bs-toggle="modal" data-bs-target="#orders"><i class="ti ti-shopping-cart me-1"></i>View Orders</a>
+                    <a href="javascript:void(0);" class="btn btn-md btn-indigo" data-bs-toggle="modal" data-bs-target="#reset"><i class="ti ti-reload me-1"></i>Reset</a>
+                    <a href="javascript:void(0);" class="btn btn-md btn-info" data-bs-toggle="modal" data-bs-target="#recents"><i class="ti ti-refresh-dot me-1"></i>Transaction</a>
+                </div>
+            </div>
+            <div class="d-flex align-items-center justify-content-between">
+                <h4 class="mb-3">Categories</h4>
+            </div>
+            <ul class="tabs owl-carousel pos-category">
+                @if (Categories == null || !Categories.Any())
+                {
+                    <!-- fallback: show placeholders while loading or if none -->
+                    <li id="all" class='@(SelectedCategoryId == "all" ? "active" : "")' @onclick='@(() => SelectCategory("all"))'>
+                        <a href="javascript:void(0);">
+                            <img src="assets/img/products/pos-product-01.png" alt="Categories">
+                        </a>
+                        <h6><a href="javascript:void(0);">All Categories</a></h6>
+                        <span>0 Items</span>
+                    </li>
+                }
+                else
+                {
+                    <li id="all" class='@(SelectedCategoryId == "all" ? "active" : "")' @onclick='@(() => SelectCategory("all"))'>
+                        <a href="javascript:void(0);">
+                            <img src="assets/img/products/pos-product-01.png" alt="Categories">
+                        </a>
+                        <h6><a href="javascript:void(0);">All Categories</a></h6>
+                        <span>@(Categories.Sum(c => c.ProductCount) == 1 ? "1 Item" : $"{Categories.Sum(c => c.ProductCount)} Items")</span>
+                    </li>
+                    @foreach (var cat in Categories)
+                    {
+                        <li id="@cat.Id.ToString()" class='@(SelectedCategoryId == cat.Id.ToString() ? "active" : "")' @onclick='@(() => SelectCategory(cat.Id.ToString()))'>
+                            <a href="javascript:void(0);">
+                                <img width="94" height="78" src="@(string.IsNullOrWhiteSpace(cat.ImageUrl) ? "assets/img/products/pos-product-01.png" : cat.ImageUrl)" alt="@cat.Name">
+                            </a>
+                            <h6><a href="javascript:void(0);">@cat.Name</a></h6>
+                            <span>@(cat.ProductCount == 1 ? "1 Item" : $"{cat.ProductCount} Items")</span>
+                        </li>
+                    }
+                }
+            </ul>
+            <div class="pos-products">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h4 class="mb-3">Products</h4>
+                    <div class="input-icon-start pos-search position-relative mb-3">
+                        <span class="input-icon-addon">
+                            <i class="ti ti-search"></i>
+                        </span>
+                        <input type="text" class="form-control" placeholder="Search Product" @bind="SearchTerm" @bind:event="oninput">
+                    </div>
+                </div>
+                <div class="tabs_container">
+                    <div class='@(SelectedCategoryId == "all" ? "tab_content active" : "tab_content")' data-tab='all'>
+                        <div class="row">
+                            @foreach (var prod in SearchFilteredProducts)
+                            {
+                                <div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
+                                    <div class="product-info card">
+                                        <a href="javascript:void(0);" class="pro-img">
+                                            <img src="@(string.IsNullOrWhiteSpace(prod.ImageUrl) ? "assets/img/products/pos-product-01.png" : prod.ImageUrl)" alt="@prod.Name">
+                                            <span><i class="ti ti-circle-check-filled"></i></span>
+                                        </a>
+                                        <h6 class="cat-name"><a href="javascript:void(0);">@FetchCategory(prod.CategoryId).Name</a></h6>
+                                        <h6 class="product-name"><a href="javascript:void(0);">@prod.Name</a></h6>
+                                        <div class="d-flex align-items-center justify-content-between price">
+                                            <span>@prod.Quantity @prod.Unit</span>
+                                            <p>₦@prod.Price.ToString("C").Substring(1)</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    @foreach (var cat in Categories)
+                    {
+                        <div class='@(SelectedCategoryId == cat.Id.ToString() ? "tab_content active" : "tab_content")' data-tab='@cat.Id'>
+                            <div class="row">
+                                @foreach (var prod in SearchFilteredProducts.Where(p => p.CategoryId == cat.Id))
+                                {
+                                    <div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
+                                        <div class="product-info card">
+                                            <a href="javascript:void(0);" class="pro-img">
+                                                <img src="@(string.IsNullOrWhiteSpace(prod.ImageUrl) ? "assets/img/products/pos-product-01.png" : prod.ImageUrl)" alt="@prod.Name">
+                                                <span><i class="ti ti-circle-check-filled"></i></span>
+                                            </a>
+                                            <h6 class="cat-name"><a href="javascript:void(0);">@cat.Name</a></h6>
+                                            <h6 class="product-name"><a href="javascript:void(0);">@prod.Name</a></h6>
+                                            <div class="d-flex align-items-center justify-content-between price">
+                                                <span>@prod.Quantity @prod.Unit</span>
+                                                <p>₦@prod.Price.ToString("C").Substring(1)</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /Products -->
+    <!-- Order Details -->
+    <div class="col-md-12 col-lg-5 col-xl-4 ps-0 theiaStickySidebar">
+        <aside class="product-order-list">
+            <div class="order-head bg-light d-flex align-items-center justify-content-between w-100">
+                <div>
+                    <h3>Order List</h3>
+                    <span>Transaction ID : #65565</span>
+                </div>
+                <div>
+                    <a class="link-danger fs-16" href="javascript:void(0);"><i class="ti ti-trash-x-filled"></i></a>
+                </div>
+            </div>
+           
+            <div class="product-added block-section">
+                <div class="head-text d-flex align-items-center justify-content-between">
+                    <h5 class="d-flex align-items-center mb-0">Product Added<span class="count">2</span></h5>
+                    <a href="javascript:void(0);" class="d-flex align-items-center link-danger"><span class="me-2"><i data-feather="x" class="feather-16"></i></span>Clear all</a>
+                </div>
+                <div class="product-wrap">
+                    <div class="empty-cart">
+                        <div class="fs-24 mb-1">
+                            <i class="ti ti-shopping-cart"></i>
+                        </div>
+                        <p class="fw-bold">No Products Selected</p>
+                    </div>
 
-						</div>
-					</div>
-					<div class="tab_content" data-tab="headphones">
-						<div class="row">
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-05.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Headphones</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Airpod 2</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>47 Pcs</span>
-										<p>$5478</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-08.png" alt="Products">
-										<span><i data-feather="check" class="feather-16"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Headphones</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">SWAGME</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>14 Pcs</span>
-										<p>$6587</p>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div class="tab_content" data-tab="shoes">
-						<div class="row">
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-04.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Shoes</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Red Nike Angelo</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>78 Pcs</span>
-										<p>$7800</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-06.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Shoes</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Blue White OGR</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>54 Pcs</span>
-										<p>$987</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-13.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Shoes</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Green Nike Fe</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>78 Pcs</span>
-										<p>$7847</p>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div class="tab_content" data-tab="mobiles">
-						<div class="row">
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-01.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Mobiles</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">IPhone 14 64GB</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>30 Pcs</span>
-										<p>$15800</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-14.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Mobiles</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Iphone 11</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>14 Pcs</span>
-										<p>$3654</p>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div class="tab_content" data-tab="watches">
-						<div class="row">
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-03.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Watches</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Rolex Tribute V3</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>220 Pcs</span>
-										<p>$6800</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-09.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Watches</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Timex Black Silver</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>24 Pcs</span>
-										<p>$1457</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-11.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Watches</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Fossil Pair Of 3 in 1 </a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>40 Pcs</span>
-										<p>$789</p>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div class="tab_content" data-tab="laptops">
-						<div class="row">
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-02.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Computer</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">MacBook Pro</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>140 Pcs</span>
-										<p>$1000</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-07.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Laptop</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">IdeaPad Slim 5 Gen 7</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>74 Pcs</span>
-										<p>$1454</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-10.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Computer</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Tablet 1.02 inch</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>14 Pcs</span>
-										<p>$4744</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-13.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Laptop</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Yoga Book 9i</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>65 Pcs</span>
-										<p>$4784</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-14.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Laptop</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">IdeaPad Slim 3i</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>47 Pcs</span>
-										<p>$1245</p>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div class="tab_content" data-tab="allcategory">
-						<div class="row">
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-01.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Mobiles</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">IPhone 14 64GB</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>30 Pcs</span>
-										<p>$15800</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-02.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Computer</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">MacBook Pro</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>140 Pcs</span>
-										<p>$1000</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-03.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Watches</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Rolex Tribute V3</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>220 Pcs</span>
-										<p>$6800</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-04.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Shoes</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Red Nike Angelo</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>78 Pcs</span>
-										<p>$7800</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-05.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Headphones</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Airpod 2</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>47 Pcs</span>
-										<p>$5478</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-06.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Shoes</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Blue White OGR</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>54 Pcs</span>
-										<p>$987</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-07.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Laptop</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">IdeaPad Slim 5 Gen 7</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>74 Pcs</span>
-										<p>$1454</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-08.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Headphones</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">SWAGME</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>14 Pcs</span>
-										<p>$6587</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-09.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Watches</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Timex Black Silver</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>24 Pcs</span>
-										<p>$1457</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-10.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Computer</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Tablet 1.02 inch</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>14 Pcs</span>
-										<p>$4744</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-11.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Watches</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Fossil Pair Of 3 in 1 </a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>40 Pcs</span>
-										<p>$789</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-13.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Shoes</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Green Nike Fe</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>78 Pcs</span>
-										<p>$7847</p>
-									</div>
-								</div>
-							</div>
-
-						</div>
-					</div>
-					<div class="tab_content" data-tab="headphone">
-						<div class="row">
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-05.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Headphones</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Airpod 2</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>47 Pcs</span>
-										<p>$5478</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-08.png" alt="Products">
-										<span><i data-feather="check" class="feather-16"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Headphones</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">SWAGME</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>14 Pcs</span>
-										<p>$6587</p>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div class="tab_content" data-tab="shoe">
-						<div class="row">
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-04.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Shoes</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Red Nike Angelo</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>78 Pcs</span>
-										<p>$7800</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-06.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Shoes</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Blue White OGR</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>54 Pcs</span>
-										<p>$987</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-13.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Shoes</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Green Nike Fe</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>78 Pcs</span>
-										<p>$7847</p>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div class="tab_content" data-tab="mobile">
-						<div class="row">
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-01.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Mobiles</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">IPhone 14 64GB</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>30 Pcs</span>
-										<p>$15800</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-14.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Mobiles</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Iphone 11</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>14 Pcs</span>
-										<p>$3654</p>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div class="tab_content" data-tab="watche">
-						<div class="row">
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-03.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Watches</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Rolex Tribute V3</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>220 Pcs</span>
-										<p>$6800</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-09.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Watches</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Timex Black Silver</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>24 Pcs</span>
-										<p>$1457</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-11.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Watches</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Fossil Pair Of 3 in 1 </a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>40 Pcs</span>
-										<p>$789</p>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div class="tab_content" data-tab="laptop">
-						<div class="row">
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-02.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Computer</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">MacBook Pro</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>140 Pcs</span>
-										<p>$1000</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-07.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Laptop</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">IdeaPad Slim 5 Gen 7</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>74 Pcs</span>
-										<p>$1454</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-10.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Computer</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Tablet 1.02 inch</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>14 Pcs</span>
-										<p>$4744</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-13.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Laptop</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">Yoga Book 9i</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>65 Pcs</span>
-										<p>$4784</p>
-									</div>
-								</div>
-							</div>
-							<div class="col-sm-6 col-md-6 col-lg-4 col-xl-3">
-								<div class="product-info card">
-									<a href="javascript:void(0);" class="pro-img">
-										<img src="assets/img/products/pos-product-14.png" alt="Products">
-										<span><i class="ti ti-circle-check-filled"></i></span>
-									</a>
-									<h6 class="cat-name"><a href="javascript:void(0);">Laptop</a></h6>
-									<h6 class="product-name"><a href="javascript:void(0);">IdeaPad Slim 3i</a></h6>
-									<div class="d-flex align-items-center justify-content-between price">
-										<span>47 Pcs</span>
-										<p>$1245</p>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!-- /Products -->
-	<!-- Order Details -->
-	<div class="col-md-12 col-lg-5 col-xl-4 ps-0 theiaStickySidebar">
-		<aside class="product-order-list">
-			<div class="order-head bg-light d-flex align-items-center justify-content-between w-100">
-				<div>
-					<h3>Order List</h3>
-					<span>Transaction ID : #65565</span>
-				</div>
-				<div>
-					<a class="link-danger fs-16" href="javascript:void(0);"><i class="ti ti-trash-x-filled"></i></a>
-				</div>
-			</div>
-			<div class="customer-info block-section">
-				<h4 class="mb-3">Customer Information</h4>
-				<div class="input-block d-flex align-items-center">
-					<div class="flex-grow-1">
-						<select class="select">
-							<option>Walk in Customer</option>
-							<option>John</option>
-							<option>Smith</option>
-							<option>Ana</option>
-							<option>Elza</option>
-						</select>
-					</div>
-					<a href="#" class="btn btn-primary btn-icon" data-bs-toggle="modal" data-bs-target="#create"><i data-feather="user-plus" class="feather-16"></i></a>
-				</div>
-				<div class="input-block">
-					<select class="select">
-						<option>Search Products</option>
-						<option>IPhone 14 64GB</option>
-						<option>MacBook Pro</option>
-						<option>Rolex Tribute V3</option>
-						<option>Red Nike Angelo</option>
-						<option>Airpod 2</option>
-						<option>Oldest</option>
-					</select>
-				</div>
-			</div>
-			<div class="product-added block-section">
-				<div class="head-text d-flex align-items-center justify-content-between">
-					<h5 class="d-flex align-items-center mb-0">Product Added<span class="count">2</span></h5>
-					<a href="javascript:void(0);" class="d-flex align-items-center link-danger"><span class="me-2"><i data-feather="x" class="feather-16"></i></span>Clear all</a>
-				</div>
-				<div class="product-wrap">
-					<div class="empty-cart">
-						<div class="fs-24 mb-1">
-							<i class="ti ti-shopping-cart"></i>
-						</div>
-						<p class="fw-bold">No Products Selected</p>
-					</div>
-					<div class="product-list align-items-center justify-content-between">
-						<div class="d-flex align-items-center product-info" data-bs-toggle="modal" data-bs-target="#products">
-							<a href="javascript:void(0);" class="pro-img">
-								<img src="assets/img/products/pos-product-04.png" alt="Products">
-							</a>
-							<div class="info">
-								<span>PT0005</span>
-								<h6><a href="javascript:void(0);">Red Nike Laser</a></h6>
-								<p class="fw-bold text-teal">$2000</p>
-							</div>
-						</div>
-						<div class="qty-item text-center">
-							<a href="javascript:void(0);" class="dec d-flex justify-content-center align-items-center" data-bs-toggle="tooltip" data-bs-placement="top" title="minus"><i data-feather="minus-circle" class="feather-14"></i></a>
-							<input type="text" class="form-control text-center" name="qty" value="4">
-							<a href="javascript:void(0);" class="inc d-flex justify-content-center align-items-center" data-bs-toggle="tooltip" data-bs-placement="top" title="plus"><i data-feather="plus-circle" class="feather-14"></i></a>
-						</div>
-						<div class="d-flex align-items-center action">
-							<a class="btn-icon edit-icon me-1" href="#" data-bs-toggle="modal"
-							   data-bs-target="#edit-product">
-								<i data-feather="edit" class="feather-14"></i>
-							</a>
-							<a class="btn-icon delete-icon" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#delete">
-								<i data-feather="trash-2" class="feather-14"></i>
-							</a>
-						</div>
-					</div>
-					<div class="product-list align-items-center justify-content-between">
-						<div class="d-flex align-items-center product-info" data-bs-toggle="modal" data-bs-target="#products">
-							<a href="javascript:void(0);" class="pro-img">
-								<img src="assets/img/products/pos-product-10.png" alt="Products">
-							</a>
-							<div class="info">
-								<span>PT0235</span>
-								<h6><a href="javascript:void(0);">Iphone 14</a></h6>
-								<p class="fw-bold text-teal">$3000</p>
-							</div>
-						</div>
-						<div class="qty-item text-center">
-							<a href="javascript:void(0);" class="dec d-flex justify-content-center align-items-center" data-bs-toggle="tooltip" data-bs-placement="top" title="minus"><i data-feather="minus-circle" class="feather-14"></i></a>
-							<input type="text" class="form-control text-center" name="qty" value="3">
-							<a href="javascript:void(0);" class="inc d-flex justify-content-center align-items-center" data-bs-toggle="tooltip" data-bs-placement="top" title="plus"><i data-feather="plus-circle" class="feather-14"></i></a>
-						</div>
-						<div class="d-flex align-items-center action">
-							<a class="btn-icon edit-icon me-1" href="#" data-bs-toggle="modal" data-bs-target="#edit-product">
-								<i data-feather="edit" class="feather-14"></i>
-							</a>
-							<a class="btn-icon delete-icon" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#delete">
-								<i data-feather="trash-2" class="feather-14"></i>
-							</a>
-						</div>
-					</div>
-					<div class="product-list align-items-center justify-content-between">
-						<div class="d-flex align-items-center product-info" data-bs-toggle="modal" data-bs-target="#products">
-							<a href="javascript:void(0);" class="pro-img">
-								<img src="assets/img/products/pos-product-09.png" alt="Products">
-							</a>
-							<div class="info">
-								<span>PT0242</span>
-								<h6><a href="javascript:void(0);">Timex Black Silver</a></h6>
-								<p class="fw-bold text-teal">$1457</p>
-							</div>
-						</div>
-						<div class="qty-item text-center">
-							<a href="javascript:void(0);" class="dec d-flex justify-content-center align-items-center" data-bs-toggle="tooltip" data-bs-placement="top" title="minus"><i data-feather="minus-circle" class="feather-14"></i></a>
-							<input type="text" class="form-control text-center" name="qty" value="1">
-							<a href="javascript:void(0);" class="inc d-flex justify-content-center align-items-center" data-bs-toggle="tooltip" data-bs-placement="top" title="plus"><i data-feather="plus-circle" class="feather-14"></i></a>
-						</div>
-						<div class="d-flex align-items-center action">
-							<a class="btn-icon edit-icon me-1" href="#" data-bs-toggle="modal"
-							   data-bs-target="#edit-product">
-								<i data-feather="edit" class="feather-14"></i>
-							</a>
-							<a class="btn-icon delete-icon" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#delete">
-								<i data-feather="trash-2" class="feather-14"></i>
-							</a>
-						</div>
-					</div>
-					<div class="product-list align-items-center justify-content-between">
-						<div class="d-flex align-items-center product-info" data-bs-toggle="modal" data-bs-target="#products">
-							<a href="javascript:void(0);" class="pro-img">
-								<img src="assets/img/products/pos-product-08.png" alt="Products">
-							</a>
-							<div class="info">
-								<span>PT0005</span>
-								<h6><a href="javascript:void(0);">SWAGME</a></h6>
-								<p class="fw-bold text-teal">$6587</p>
-							</div>
-						</div>
-						<div class="qty-item text-center">
-							<a href="javascript:void(0);" class="dec d-flex justify-content-center align-items-center" data-bs-toggle="tooltip" data-bs-placement="top" title="minus"><i data-feather="minus-circle" class="feather-14"></i></a>
-							<input type="text" class="form-control text-center" name="qty" value="1">
-							<a href="javascript:void(0);" class="inc d-flex justify-content-center align-items-center" data-bs-toggle="tooltip" data-bs-placement="top" title="plus"><i data-feather="plus-circle" class="feather-14"></i></a>
-						</div>
-						<div class="d-flex align-items-center action">
-							<a class="btn-icon edit-icon me-1" href="#" data-bs-toggle="modal"
-							   data-bs-target="#edit-product">
-								<i data-feather="edit" class="feather-14"></i>
-							</a>
-							<a class="btn-icon delete-icon" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#delete">
-								<i data-feather="trash-2" class="feather-14"></i>
-							</a>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="block-section">
-				<div class="selling-info">
-					<div class="row g-3">
-						<div class="col-12 col-sm-4">
-							<div>
-								<label class="form-label">Order Tax</label>
-								<select class="select">
-									<option>Select</option>
-									<option>GST 5%</option>
-									<option>GST 10%</option>
-									<option>GST 15%</option>
-									<option>GST 20%</option>
-									<option>GST 25%</option>
-									<option>GST 30%</option>
-								</select>
-							</div>
-						</div>
-						<div class="col-12 col-sm-4">
-							<div>
-								<label class="form-label">Shipping</label>
-								<select class="select">
-									<option>0</option>
-									<option>15</option>
-									<option>20</option>
-									<option>25</option>
-									<option>30</option>
-								</select>
-							</div>
-						</div>
-						<div class="col-12 col-sm-4">
-							<div>
-								<label class="form-label">Discount</label>
-								<select class="select">
-									<option>0%</option>
-									<option>10%</option>
-									<option>10%</option>
-									<option>15%</option>
-									<option>20%</option>
-									<option>25%</option>
-									<option>30%</option>
-								</select>
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="order-total">
-					<table class="table table-responsive table-borderless">
-						<tr>
-							<td>Sub Total</td>
-							<td class="text-end">$60,454</td>
-						</tr>
-						<tr>
-							<td>Tax (GST 5%)</td>
-							<td class="text-end">$40.21</td>
-						</tr>
-						<tr>
-							<td>Shipping</td>
-							<td class="text-end">$40.21</td>
-						</tr>
-						<tr>
-							<td>Sub Total</td>
-							<td class="text-end">$60,454</td>
-						</tr>
-						<tr>
-							<td class="text-danger">Discount (10%)</td>
-							<td class="text-danger text-end">$15.21</td>
-						</tr>
-						<tr>
-							<td>Total</td>
-							<td class="text-end">$64,024.5</td>
-						</tr>
-					</table>
-				</div>
-			</div>
-			<div class="block-section payment-method">
-				<h4>Payment Method</h4>
-				<div class="row align-items-center justify-content-center methods g-3">
-					<div class="col-sm-6 col-md-4">
-						<a href="javascript:void(0);" class="payment-item" data-bs-toggle="modal" data-bs-target="#payment-cash">
-							<i class="ti ti-cash-banknote fs-18"></i>
-							<span class="text-dark">Cash</span>
-						</a>
-					</div>
-					<div class="col-sm-6 col-md-4">
-						<a href="javascript:void(0);" class="payment-item" data-bs-toggle="modal" data-bs-target="#payment-card">
-							<i class="ti ti-credit-card fs-18"></i>
-							<span class="text-dark">Debit Card</span>
-						</a>
-					</div>
-					<div class="col-sm-6 col-md-4">
-						<a href="javascript:void(0);" class="payment-item" data-bs-toggle="modal" data-bs-target="#scan-payment">
-							<i class="ti ti-scan fs-18"></i>
-							<span class="text-dark">Scan</span>
-						</a>
-					</div>
-				</div>
-			</div>
-			<div class="btn-block">
-				<a class="btn btn-secondary w-100" href="javascript:void(0);">
-					Grand Total : $64,024.5
-				</a>
-			</div>
-			<div class="btn-row d-sm-flex align-items-center justify-content-between">
-				<a href="javascript:void(0);" class="btn btn-purple d-flex align-items-center justify-content-center flex-fill" data-bs-toggle="modal" data-bs-target="#hold-order"><i class="ti ti-player-pause me-1"></i>Hold</a>
-				<a href="javascript:void(0);" class="btn btn-danger d-flex align-items-center justify-content-center flex-fill"><i class="ti ti-trash me-1"></i>Void</a>
-				<a href="javascript:void(0);" class="btn btn-success d-flex align-items-center justify-content-center flex-fill" data-bs-toggle="modal" data-bs-target="#payment-completed"><i class="ti ti-cash-banknote me-1"></i>Payment</a>
-			</div>
-		</aside>
-	</div>
-	<!-- /Order Details -->
+                    <div class="product-list align-items-center justify-content-between">
+                        <div class="d-flex align-items-center product-info" data-bs-toggle="modal" data-bs-target="#products">
+                            <a href="javascript:void(0);" class="pro-img">
+                                <img src="assets/img/products/pos-product-04.png" alt="Products">
+                            </a>
+                            <div class="info">
+                                <span>PT0005</span>
+                                <h6><a href="javascript:void(0);">Red Nike Laser</a></h6>
+                                <p class="fw-bold text-teal">$2000</p>
+                            </div>
+                        </div>
+                        <div class="qty-item text-center">
+                            <a href="javascript:void(0);" class="dec d-flex justify-content-center align-items-center" data-bs-toggle="tooltip" data-bs-placement="top" title="minus">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-dash" viewBox="0 0 16 16">
+                                    <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8" />
+                                </svg>
+                            </a>
+                            <input type="text" class="form-control text-center" name="qty" value="4">
+                            <a href="javascript:void(0);" class="inc d-flex justify-content-center align-items-center" data-bs-toggle="tooltip" data-bs-placement="top" title="plus">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+                                </svg>
+                            </a>
+                        </div>
+                        <div class="d-flex align-items-center action">
+                            @* <a class="btn-icon edit-icon me-1" href="#" data-bs-toggle="modal"
+                               data-bs-target="#edit-product">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-folder2-open" viewBox="0 0 16 16">
+                                    <path d="M1 3.5A1.5 1.5 0 0 1 2.5 2h2.764c.958 0 1.76.56 2.311 1.184C7.985 3.648 8.48 4 9 4h4.5A1.5 1.5 0 0 1 15 5.5v.64c.57.265.94.876.856 1.546l-.64 5.124A2.5 2.5 0 0 1 12.733 15H3.266a2.5 2.5 0 0 1-2.481-2.19l-.64-5.124A1.5 1.5 0 0 1 1 6.14zM2 6h12v-.5a.5.5 0 0 0-.5-.5H9c-.964 0-1.71-.629-2.174-1.154C6.374 3.334 5.82 3 5.264 3H2.5a.5.5 0 0 0-.5.5zm-.367 1a.5.5 0 0 0-.496.562l.64 5.124A1.5 1.5 0 0 0 3.266 14h9.468a1.5 1.5 0 0 0 1.489-1.314l.64-5.124A.5.5 0 0 0 14.367 7z" />
+                                </svg>
+                            </a> *@
+                            <a class="btn-icon delete-icon" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#delete">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                                  <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                                  <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            <div class="block-section">
+                 
+                <div class="order-total">
+                    <table class="table table-responsive table-borderless">
+                         
+                        <tr>
+                            <td>Total</td>
+                            <td class="text-end">$64,024.5</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="block-section payment-method">
+                <h4>Payment Method</h4>
+                <div class="row align-items-center justify-content-center methods g-3">
+                    <div class="col-sm-6 col-md-4">
+                        <a href="javascript:void(0);" class="payment-item" data-bs-toggle="modal" data-bs-target="#payment-cash">
+                            <i class="ti ti-cash-banknote fs-18"></i>
+                            <span class="text-dark">Cash</span>
+                        </a>
+                    </div>
+                    <div class="col-sm-6 col-md-4">
+                        <a href="javascript:void(0);" class="payment-item" data-bs-toggle="modal" data-bs-target="#payment-card">
+                            <i class="ti ti-credit-card fs-18"></i>
+                            <span class="text-dark">Debit Card</span>
+                        </a>
+                    </div>
+                    <div class="col-sm-6 col-md-4">
+                        <a href="javascript:void(0);" class="payment-item" data-bs-toggle="modal" data-bs-target="#scan-payment">
+                            <i class="ti ti-scan fs-18"></i>
+                            <span class="text-dark">Transfer</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="btn-block">
+                <a class="btn btn-secondary w-100" href="javascript:void(0);">
+                    Grand Total : $64,024.5
+                </a>
+            </div>
+            <div class="btn-row d-sm-flex align-items-center justify-content-between">
+                <a href="javascript:void(0);" class="btn btn-purple d-flex align-items-center justify-content-center flex-fill" data-bs-toggle="modal" data-bs-target="#hold-order"><i class="ti ti-player-pause me-1"></i>Hold</a>
+                <a href="javascript:void(0);" class="btn btn-danger d-flex align-items-center justify-content-center flex-fill"><i class="ti ti-trash me-1"></i>Void</a>
+                <a href="javascript:void(0);" class="btn btn-success d-flex align-items-center justify-content-center flex-fill" data-bs-toggle="modal" data-bs-target="#payment-completed"><i class="ti ti-cash-banknote me-1"></i>Payment</a>
+            </div>
+        </aside>
+    </div>
+    <!-- /Order Details -->
 
 </div>
+
+<!-- Modals Begins -->
+<!-- Print Receipt -->
+<div class="modal fade modal-default" id="print-receipt" aria-labelledby="print-receipt">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="icon-head text-center">
+                    <a href="javascript:void(0);">
+                        <img src="assets/img/logo.svg" width="100" height="30" alt="Receipt Logo">
+                    </a>
+                </div>
+                <div class="text-center info text-center">
+                    <h6>Dreamguys Technologies Pvt Ltd.,</h6>
+                    <p class="mb-0">Phone Number: +1 5656665656</p>
+                    <p class="mb-0">Email: <a href="mailto:example@gmail.com">example@gmail.com</a></p>
+                </div>
+                <div class="tax-invoice">
+                    <h6 class="text-center">Tax Invoice</h6>
+                    <div class="row">
+                        <div class="col-sm-12 col-md-6">
+                            <div class="invoice-user-name"><span>Name: </span>John Doe</div>
+                            <div class="invoice-user-name"><span>Invoice No: </span>CS132453</div>
+                        </div>
+                        <div class="col-sm-12 col-md-6">
+                            <div class="invoice-user-name"><span>Customer Id: </span>#LL93784</div>
+                            <div class="invoice-user-name"><span>Date: </span>01.07.2022</div>
+                        </div>
+                    </div>
+                </div>
+                <table class="table-borderless w-100 table-fit">
+                    <thead>
+                        <tr>
+                            <th># Item</th>
+                            <th>Price</th>
+                            <th>Qty</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1. Red Nike Laser</td>
+                            <td>$50</td>
+                            <td>3</td>
+                            <td class="text-end">$150</td>
+                        </tr>
+                        <tr>
+                            <td>2. Iphone 14</td>
+                            <td>$50</td>
+                            <td>2</td>
+                            <td class="text-end">$100</td>
+                        </tr>
+                        <tr>
+                            <td>3. Apple Series 8</td>
+                            <td>$50</td>
+                            <td>3</td>
+                            <td class="text-end">$150</td>
+                        </tr>
+                        <tr>
+                            <td colspan="4">
+                                <table class="table-borderless w-100 table-fit">
+                                    <tr>
+                                        <td class="fw-bold">Sub Total :</td>
+                                        <td class="text-end">$700.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">Discount :</td>
+                                        <td class="text-end">-$50.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">Shipping :</td>
+                                        <td class="text-end">0.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">Tax (5%) :</td>
+                                        <td class="text-end">$5.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">Total Bill :</td>
+                                        <td class="text-end">$655.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">Due :</td>
+                                        <td class="text-end">$0.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">Total Payable :</td>
+                                        <td class="text-end">$655.00</td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="text-center invoice-bar">
+                    <div class="border-bottom border-dashed">
+                        <p>**VAT against this challan is payable through central registration. Thank you for your business!</p>
+                    </div>
+                    <a href="javascript:void(0);">
+                        <img src="assets/img/barcode/barcode-03.jpg" alt="Barcode">
+                    </a>
+                    <p class="text-dark fw-bold">Sale 31</p>
+                    <p>Thank You For Shopping With Us. Please Come Again</p>
+                    <a href="javascript:void(0);" class="btn btn-md btn-primary">Print Receipt</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /Print Receipt -->
+
+<!-- Products -->
+<div class="modal fade modal-default pos-modal" id="products" aria-labelledby="products">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <h5 class="me-4">Products</h5>
+                </div>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="card bg-light mb-3">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap mb-3">
+                            <span class="badge bg-dark fs-12">Order ID : #45698</span>
+                            <p class="fs-16">Number of Products : 02</p>
+                        </div>
+                        <div class="product-wrap h-auto">
+                            <div class="product-list bg-white align-items-center justify-content-between">
+                                <div class="d-flex align-items-center product-info" data-bs-toggle="modal" data-bs-target="#products">
+                                    <a href="javascript:void(0);" class="pro-img">
+                                        <img src="assets/img/products/pos-product-16.png" alt="Products">
+                                    </a>
+                                    <div class="info">
+                                        <h6><a href="javascript:void(0);">Red Nike Laser</a></h6>
+                                        <p>Quantity : 04</p>
+                                    </div>
+                                </div>
+                                <p class="text-teal fw-bold">$2000</p>
+                            </div>
+                            <div class="product-list bg-white align-items-center justify-content-between">
+                                <div class="d-flex align-items-center product-info" data-bs-toggle="modal" data-bs-target="#products">
+                                    <a href="javascript:void(0);" class="pro-img">
+                                        <img src="assets/img/products/pos-product-17.png" alt="Products">
+                                    </a>
+                                    <div class="info">
+                                        <h6><a href="javascript:void(0);">Iphone 11S</a></h6>
+                                        <p>Quantity : 04</p>
+                                    </div>
+                                </div>
+                                <p class="text-teal fw-bold">$3000</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /Products -->
+
+<!-- Edit Product -->
+<div class="modal fade modal-default pos-modal" id="edit-product" aria-labelledby="edit-product">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Product</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <form action="pos-2.html">
+                <div class="modal-body pb-1">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="mb-3">
+                                <label class="form-label">Product Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" value="Red Nike Laser Show" disabled>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 col-sm-12 col-12">
+                            <div class="mb-3">
+                                <label class="form-label">Product Price <span class="text-danger">*</span></label>
+                                <div class="input-icon-start position-relative">
+                                    <span class="input-icon-addon text-gray-9">
+                                        <i class="ti ti-currency-dollar"></i>
+                                    </span>
+                                    <input type="text" class="form-control" value="1800">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 col-sm-12 col-12">
+                            <div class="mb-3">
+                                <label class="form-label">Tax Type <span class="text-danger">*</span></label>
+                                <select class="select">
+                                    <option>Exclusive</option>
+                                    <option>Inclusive</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 col-sm-12 col-12">
+                            <div class="mb-3">
+                                <label class="form-label">Tax <span class="text-danger">*</span></label>
+                                <div class="input-icon-start position-relative">
+                                    <span class="input-icon-addon text-gray-9">
+                                        <i class="ti ti-percentage"></i>
+                                    </span>
+                                    <input type="text" class="form-control" value="15">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 col-sm-12 col-12">
+                            <div class="mb-3">
+                                <label class="form-label">Discount Type <span class="text-danger">*</span></label>
+                                <select class="select">
+                                    <option>Percentage</option>
+                                    <option>Early payment discounts</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 col-sm-12 col-12">
+                            <div class="mb-3">
+                                <label class="form-label">Discount <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" value="15">
+                            </div>
+                        </div>
+                        <div class="col-lg-6 col-sm-12 col-12">
+                            <div class="mb-3">
+                                <label class="form-label">Sale Unit <span class="text-danger">*</span></label>
+                                <select class="select">
+                                    <option>Kilogram</option>
+                                    <option>Grams</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer d-flex justify-content-end flex-wrap gap-2">
+                    <button type="button" class="btn btn-md btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-md btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- /Edit Product -->
+
+<!-- Delete Product -->
+<div class="modal fade modal-default" id="delete" aria-labelledby="payment-completed">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body p-0">
+                <div class="success-wrap text-center">
+                    <form action="pos-2.html">
+                        <div class="icon-success bg-danger-transparent text-danger mb-2">
+                            <i class="ti ti-trash"></i>
+                        </div>
+                        <h3 class="mb-2">Are you Sure!</h3>
+                        <p class="fs-16 mb-3">
+                            The current order will be deleted as no payment has been made so far.
+                        </p>
+                        <div class="d-flex align-items-center justify-content-center gap-2 flex-wrap">
+                            <button type="button" class="btn btn-md btn-secondary" data-bs-dismiss="modal">No, Cancel</button>
+                            <button type="submit" class="btn btn-md btn-primary">Yes, Delete</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /Delete Product -->
+
+<!-- Reset -->
+<div class="modal fade modal-default" id="reset" aria-labelledby="payment-completed">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body p-0">
+                <div class="success-wrap text-center">
+                    <form action="pos-2.html">
+                        <div class="icon-success bg-purple-transparent text-purple mb-2">
+                            <i class="ti ti-transition-top"></i>
+                        </div>
+                        <h3 class="mb-2">Confirm Your Action</h3>
+                        <p class="fs-16 mb-3">The current order will be cleared. But not deleted if it's persistent. Would you like to proceed ?</p>
+                        <div class="d-flex align-items-center justify-content-center gap-2 flex-wrap">
+                            <button type="button" class="btn btn-md btn-secondary" data-bs-dismiss="modal">No, Cancel</button>
+                            <button type="submit" class="btn btn-md btn-primary">Yes, Proceed</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /Reset -->
+
 @code {
+    private List<CategoryDto> Categories { get; set; } = new List<CategoryDto>();
+    private bool _needsCarouselInit = false;
+    private List<ProductDto> Products { get; set; } = new List<ProductDto>();
+    private string SelectedCategoryId { get; set; } = "all";
+    private string SearchTerm { get; set; } = string.Empty;
+
+    private IEnumerable<ProductDto> SearchFilteredProducts => string.IsNullOrWhiteSpace(SearchTerm)
+        ? Products
+        : Products.Where(p => p.Name?.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) == true);
+
+    private CategoryDto FetchCategory(Guid id) => Categories.FirstOrDefault(c => c.Id == id)!;
+
+    private void SelectCategory(string id)
+    {
+        SelectedCategoryId = id;
+        // After selecting category, reinitialize carousel on next render
+        _needsCarouselInit = true;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var respWrapper = await Http.GetFromJsonAsync<ApiResponse<List<CategoryDto>>>("/api/categories");
+            var resp = respWrapper?.Data;
+            if (resp != null)
+            {
+                Categories = resp.OrderBy(c => c.Name).ToList();
+                var respProdictWrapper = await Http.GetFromJsonAsync<ApiResponse<List<ProductDto>>>("/api/products");
+                Products = respProdictWrapper?.Data.ToList() ?? new List<ProductDto>();
+            }
+        }
+        catch (Exception e)
+        {
+            Categories = new List<CategoryDto>();
+        }
+        // signal that we should initialize the carousel after render
+        _needsCarouselInit = true;
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        if (_needsCarouselInit)
         {
             try
             {
                 await JS.InvokeVoidAsync("initPosCategoryCarousel");
             }
             catch { }
+            _needsCarouselInit = false;
+            StateHasChanged();
         }
     }
+
+    // local model to avoid adding project references in the Shop project
+    public class ApiResponse<T>
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; } = string.Empty;
+        public T Data { get; set; }
+        public int StatusCode { get; set; }
+        public List<string> Errors { get; set; } = new List<string>();
+    }
+
+    // Using shared CategoryDto directly; no local remapping required
 }

@@ -16,7 +16,21 @@ public class CategoryRepository : ICategoryRepository
 
     public async Task<List<Category>> GetAllAsync()
     {
-        return await _db.Set<Category>().OrderByDescending(c => c.CreatedAt).ToListAsync();
+        // Fetch categories and product counts in a single query
+        var categories = await _db.Categories.OrderByDescending(c => c.CreatedAt)
+            .Select(c => new Category
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Slug = c.Slug,
+                IsActive = c.IsActive,
+                CreatedAt = c.CreatedAt,
+                ImageUrl = c.ImageUrl,
+                ProductCount = _db.Products.Count(p => p.CategoryId == c.Id)
+            })
+            .ToListAsync();
+
+        return categories;
     }
 
     public async Task<Category?> GetByIdAsync(Guid id)

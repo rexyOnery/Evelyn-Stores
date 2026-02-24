@@ -62,6 +62,8 @@ namespace EvelynStores.Infrastructure.Data
                 entity.Property(c => c.Name).IsRequired().HasMaxLength(200);
                 entity.Property(c => c.Slug).HasMaxLength(200);
                 entity.Property(c => c.CreatedAt).IsRequired();
+                // store potentially large base64 data or image url
+                entity.Property(c => c.ImageUrl).HasColumnType("text");
             });
 
             modelBuilder.Entity<PasswordResetOtp>(entity =>

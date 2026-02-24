@@ -22,7 +22,10 @@ public class CategoryService : ICategoryService
             Name = c.Name,
             Slug = c.Slug,
             IsActive = c.IsActive,
-            CreatedAt = c.CreatedAt
+            CreatedAt = c.CreatedAt,
+            ImageUrl = c.ImageUrl
+            ,
+            ProductCount = c.ProductCount
         }).ToList();
     }
 
@@ -36,7 +39,8 @@ public class CategoryService : ICategoryService
             Name = c.Name,
             Slug = c.Slug,
             IsActive = c.IsActive,
-            CreatedAt = c.CreatedAt
+            CreatedAt = c.CreatedAt,
+            ImageUrl = c.ImageUrl
         };
     }
 
@@ -48,7 +52,8 @@ public class CategoryService : ICategoryService
             Name = dto.Name,
             Slug = dto.Slug,
             IsActive = dto.IsActive,
-            CreatedAt = dto.CreatedAt == default ? DateTime.UtcNow : dto.CreatedAt
+            CreatedAt = dto.CreatedAt == default ? DateTime.UtcNow : dto.CreatedAt,
+            ImageUrl = dto.ImageUrl
         };
 
         await _repo.AddAsync(c);
@@ -64,6 +69,7 @@ public class CategoryService : ICategoryService
         existing.Name = dto.Name;
         existing.Slug = dto.Slug;
         existing.IsActive = dto.IsActive;
+        existing.ImageUrl = dto.ImageUrl;
 
         await _repo.UpdateAsync(existing);
 
