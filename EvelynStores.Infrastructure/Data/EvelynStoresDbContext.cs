@@ -25,6 +25,8 @@ namespace EvelynStores.Infrastructure.Data
         public DbSet<Product> Products { get; set; }
         public DbSet<ProductLevel> ProductLevels { get; set; }
         public DbSet<Purchase> Purchases { get; set; }
+        public DbSet<Sale> Sales { get; set; }
+        public DbSet<SaleItem> SaleItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -94,6 +96,28 @@ namespace EvelynStores.Infrastructure.Data
                 entity.Property(s => s.CreatedAt).IsRequired();
                 entity.HasIndex(s => s.Slug);
                 entity.HasOne<Category>().WithMany().HasForeignKey(s => s.CategoryId).OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<Sale>(entity =>
+            {
+                entity.HasKey(s => s.Id);
+                entity.Property(s => s.TransactionId).IsRequired().HasMaxLength(50);
+                entity.HasIndex(s => s.TransactionId).IsUnique();
+                entity.Property(s => s.CreatedAt).IsRequired();
+            });
+
+            modelBuilder.Entity<SaleItem>(entity =>
+            {
+                entity.HasKey(si => si.Id);
+                entity.HasOne(si => si.Sale)
+                    .WithMany(s => s.Items)
+                    .HasForeignKey(si => si.SaleId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.Property(si => si.ProductImageUrl).IsRequired().HasMaxLength(int.MaxValue);
+                entity.HasOne(si => si.Product)
+                    .WithMany()
+                    .HasForeignKey(si => si.ProductId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
         }
     }
