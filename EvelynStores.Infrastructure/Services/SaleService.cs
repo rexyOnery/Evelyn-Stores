@@ -2,6 +2,7 @@ using EvelynStores.Core.DTOs;
 using EvelynStores.Core.Entities;
 using EvelynStores.Core.Services;
 using EvelynStores.Infrastructure.Data;
+using EvelynStores.Infrastructure.Migrations;
 using Microsoft.EntityFrameworkCore;
 
 namespace EvelynStores.Infrastructure.Services;
@@ -65,6 +66,18 @@ public class SaleService : ISaleService
                 if (product.Quantity < 0) product.Quantity = 0;
             }
         }
+
+        // Reduce product Levels
+        foreach (var item in dto.Items)
+        {
+            var productLevel = await _context.ProductLevels.FindAsync(item.ProductId);
+            if (productLevel != null)
+            {
+                productLevel.InStockQuantity -= item.Quantity;
+                if (productLevel.InStockQuantity < 0) productLevel.InStockQuantity = 0;
+            }
+        }
+
         await _context.SaveChangesAsync();
 
         return MapToDto(sale);

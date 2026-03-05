@@ -30,6 +30,24 @@ public class ProductLevelsController : ControllerBase
 
     }
 
+    /// <summary>
+    /// Creates a new product level record.
+    /// </summary>
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] ProductLevelDto dto)
+    {
+        if (dto == null) return BadRequest(EvelynPhilApiResponse.ErrorResponse("Invalid request", 400));
+        try
+        {
+            var created = await _levelService.CreateAsync(dto);
+            return Ok(EvelynPhilApiResponse<ProductLevelDto>.SuccessResponse(created));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, EvelynPhilApiResponse.ErrorResponse("Failed to create product level", 500, new List<string> { ex.Message }));
+        }
+    }
+
     [HttpPost("set-reorder/{productId:guid}")]
     public async Task<IActionResult> SetReOrderLevel(Guid productId, [FromBody] SetReorderRequest req)
     {

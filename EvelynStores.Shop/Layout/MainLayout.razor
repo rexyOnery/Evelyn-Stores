@@ -35,7 +35,7 @@
 
 			<!-- Search -->
 			<li class="nav-item time-nav">
-				<span class="bg-teal text-white d-inline-flex align-items-center"><img src="assets/img/icons/clock-icon.svg" alt="img" class="me-2">09:25:32</span>
+				<span class="bg-teal text-white d-inline-flex align-items-center"><img src="assets/img/icons/clock-icon.svg" alt="img" class="me-2">@CurrentTime</span>
 			</li>
 			<!-- /Search -->
 
@@ -93,3 +93,23 @@
 	</div>
 
 </div>
+@code{
+	private string CurrentTime { get; set; } = DateTime.Now.ToString("HH:mm:ss");
+	private Timer? _timer;
+
+	protected override void OnInitialized()
+	{
+		_timer = new Timer(UpdateTime, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
+	}
+
+	private void UpdateTime(object? state)
+	{
+		CurrentTime = DateTime.Now.ToString("HH:mm:ss");
+		InvokeAsync(StateHasChanged);
+	}
+
+	public void Dispose()
+	{
+		_timer?.Dispose();
+	}
+}

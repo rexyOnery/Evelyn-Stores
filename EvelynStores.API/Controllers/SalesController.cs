@@ -55,6 +55,8 @@ public class SalesController : ControllerBase
             var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
             return BadRequest(EvelynPhilApiResponse.ErrorResponse("Validation failed.", 400, errors));
         }
+        
+
 
         if (dto.Items == null || dto.Items.Count == 0)
         {

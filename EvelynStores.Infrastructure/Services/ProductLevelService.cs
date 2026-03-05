@@ -1,3 +1,4 @@
+using System;
 using EvelynStores.Core.DTOs;
 using EvelynStores.Core.Entities;
 using EvelynStores.Core.Services;
@@ -147,7 +148,8 @@ public class ProductLevelService : IProductLevelService
             ProductId = existing.ProductId,
             PurchaseQuantity = existing.PurchaseQuantity,
             InStockQuantity = existing.InStockQuantity,
-            ReOrderLevel = existing.ReOrderLevel
+            ReOrderLevel = existing.ReOrderLevel,
+            SKU = existing.SKU
         };
     }
 
@@ -162,6 +164,58 @@ public class ProductLevelService : IProductLevelService
             InStockQuantity = existing.InStockQuantity,
             ReOrderLevel = existing.ReOrderLevel
         }).ToList();
+    }
+
+    public async Task<ProductLevelDto> CreateAsync(ProductLevelDto dto)
+    {
+        ArgumentNullException.ThrowIfNull(dto);
+        // If a record exists for the same product and SKU, update only the price
+        var existing = await _repo.GetByProductIdAsync(dto.ProductId);
+        if (existing != null && !string.IsNullOrWhiteSpace(existing.SKU) &&
+            string.Equals(existing.SKU, dto.SKU, StringComparison.OrdinalIgnoreCase))
+        {
+            existing.Price = dto.Price;
+            existing.InStockQuantity = dto.InStockQuantity;
+            existing.PurchaseQuantity = dto.PurchaseQuantity;
+            await _repo.UpdateAsync(existing);
+            EnsureInStockFallback(existing);
+
+            return new ProductLevelDto
+            {
+                Id = existing.Id,
+                ProductId = existing.ProductId,
+                PurchaseQuantity = existing.PurchaseQuantity,
+                InStockQuantity = existing.InStockQuantity,
+                ReOrderLevel = existing.ReOrderLevel,
+                Price = existing.Price,
+                SKU = existing.SKU
+            };
+        }
+
+        // Otherwise insert a new record (either no existing record or SKU differs)
+        var pl = new ProductLevel
+        {
+            ProductId = dto.ProductId,
+            PurchaseQuantity = dto.PurchaseQuantity,
+            InStockQuantity = dto.InStockQuantity,
+            ReOrderLevel = dto.ReOrderLevel,
+            Price = dto.Price,
+            SKU = dto.SKU,
+            CreatedAt = DateTime.UtcNow
+        };
+        EnsureInStockFallback(pl);
+        await _repo.AddAsync(pl);
+
+        return new ProductLevelDto
+        {
+            Id = pl.Id,
+            ProductId = pl.ProductId,
+            PurchaseQuantity = pl.PurchaseQuantity,
+            InStockQuantity = pl.InStockQuantity,
+            ReOrderLevel = pl.ReOrderLevel,
+            Price = pl.Price,
+            SKU = pl.SKU
+        };
     }
 
     public async Task<ProductLevelDto?> SetReOrderLevelAsync(Guid productId, int reorderLevel)

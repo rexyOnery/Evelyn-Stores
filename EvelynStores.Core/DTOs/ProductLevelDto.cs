@@ -11,6 +11,8 @@ namespace EvelynStores.Core.DTOs
         public Guid CategoryId { get; set; } = Guid.Empty;
         public int PurchaseQuantity { get; set; } 
          public int InStockQuantity { get; set; }
-         public int ReOrderLevel { get; set; } 
+         public int ReOrderLevel { get; set; }
+        public decimal Price { get; set; }
+        public string SKU { get; set; }
     }
 }

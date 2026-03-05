@@ -123,9 +123,9 @@
             <div class="order-head bg-light d-flex align-items-center justify-content-between w-100">
                 <div>
                     <h3>Order List</h3>
-                   @*  <span>Transaction ID : #65565</span> *@
+                    @*  <span>Transaction ID : #65565</span> *@
                 </div>
-               @*  <div>
+                @*  <div>
                     <a class="link-danger fs-16" href="javascript:void(0);"><i class="ti ti-trash-x-filled"></i></a>
                 </div> *@
             </div>
@@ -135,8 +135,13 @@
                     @* <a href="javascript:void(0);" class="d-flex align-items-center link-danger"><span class="me-2"><i data-feather="x" class="feather-16"></i></span>Clear all</a> *@
                 </div>
                 <div class="product-wrap">
-                    
-                       
+
+                    <div class="empty-cart">
+                        <div class="fs-24 mb-1">
+                            <i class="ti ti-shopping-cart"></i>
+                        </div>
+                        <p class="fw-bold">@Cart.Count Products Selected</p>
+                    </div>
                     @if (Cart != null && Cart.Count > 0)
                     {
                         @foreach (var item in Cart)
@@ -193,7 +198,7 @@
                     }
                 </div>
             </div>
-                <div class="block-section">
+            <div class="block-section">
 
                 <div class="order-total">
                     <table class="table table-responsive table-borderless">
@@ -221,7 +226,7 @@
                                     </a>
                                 </div>
                             </td>
-                            
+
                         </tr>
                     </table>
                 </div>
@@ -249,7 +254,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="btn-row d-sm-flex align-items-center justify-content-between">
                 @* <a href="javascript:void(0);" class="btn btn-purple d-flex align-items-center justify-content-center flex-fill" data-bs-toggle="modal" data-bs-target="#hold-order"><i class="ti ti-player-pause me-1"></i>Hold</a>
                 <a href="javascript:void(0);" class="btn btn-danger d-flex align-items-center justify-content-center flex-fill"><i class="ti ti-trash me-1"></i>Void</a> *@
@@ -262,7 +267,6 @@
 </div>
 
 <!-- Modals Begins -->
- 
 <!-- Products -->
 <div class="modal fade modal-default pos-modal" id="products" aria-labelledby="products">
     <div class="modal-dialog modal-dialog-centered">
@@ -494,13 +498,16 @@
                                 <label class="form-label">Payment Note</label>
                                 <textarea class="form-control" rows="3" placeholder="Type your message" @bind="PaymentNote"></textarea>
                             </div>
-                        </div> 
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer d-flex justify-content-end flex-wrap gap-2">
                     <button type="button" class="btn btn-md btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-md btn-primary" data-bs-dismiss="modal" @onclick='async () => await SubmitOrderAsync("Transfer")' disabled="@IsSubmitting">
-                        @if (IsSubmitting) { <span class="spinner-border spinner-border-sm me-1"></span> }
+                        @if (IsSubmitting)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
                         Submit
                     </button>
                 </div>
@@ -539,13 +546,13 @@
                                 <div class="input-icon-start position-relative">
                                     <span class="input-icon-addon text-gray-9">
                                         <i class="ti ti-currency-dollar"></i>
-                                    </span> 
+                                    </span>
                                     <input type="number" step="0.01" class="form-control" @bind="PayingAmount" @bind:event="oninput" disabled />
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-4">
-                                <div class="change-item mb-3">
+                            <div class="change-item mb-3">
                                 <label class="form-label">Change</label>
                                 <div class="input-icon-start position-relative">
                                     <span class="input-icon-addon text-gray-9">
@@ -554,9 +561,9 @@
                                     <input disabled type="text" class="form-control" value="@ChangeAmount.ToString("N2")">
                                 </div>
                             </div>
-                            
+
                         </div>
-                        
+
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label">Payment Receiver</label>
@@ -568,13 +575,16 @@
                                 <label class="form-label">Payment Note</label>
                                 <textarea class="form-control" rows="3" placeholder="Type your message"></textarea>
                             </div>
-                        </div> 
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer d-flex justify-content-end flex-wrap gap-2">
                     <button type="button" class="btn btn-md btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-md btn-primary" data-bs-dismiss="modal" @onclick='async () => await SubmitOrderAsync("Cash")' disabled="@IsSubmitting">
-                        @if (IsSubmitting) { <span class="spinner-border spinner-border-sm me-1"></span> }
+                        @if (IsSubmitting)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
                         Submit
                     </button>
                 </div>
@@ -629,13 +639,16 @@
                                 <label class="form-label">Payment Note</label>
                                 <textarea class="form-control" rows="3" placeholder="Type your message" @bind="PaymentNote"></textarea>
                             </div>
-                        </div> 
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer d-flex justify-content-end flex-wrap gap-2">
                     <button type="button" class="btn btn-md btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-md btn-primary" data-bs-dismiss="modal" @onclick='async () => await SubmitOrderAsync("Card")' disabled="@IsSubmitting">
-                        @if (IsSubmitting) { <span class="spinner-border spinner-border-sm me-1"></span> }
+                        @if (IsSubmitting)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
                         Submit
                     </button>
                 </div>
@@ -832,6 +845,38 @@
     </div>
 </div>
 <!-- /Print Receipt -->
+<!-- Vertically Centered Modal -->
+<div class="modal fade" id="outofproduct" tabindex="-1"
+     aria-labelledby="outofproduct" data-bs-keyboard="false"
+     aria-hidden="true">
+    <!-- Scrollable modal -->
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="staticBackdropLabel2">
+                    Out of Product
+                </h4>
+                <button type="button" class="close" data-bs-dismiss="modal"
+                        aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>
+                   @OutOfProductMessage
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-cancel me-2"
+                        data-bs-dismiss="modal">
+                    Close
+                </button> 
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- /Vertically Centered Modal -->
 @code {
     private List<CategoryDto> Categories { get; set; } = new List<CategoryDto>();
     private bool _needsCarouselInit = false;
@@ -840,7 +885,7 @@
     private string SearchTerm { get; set; } = string.Empty;
     private ProductDto? SelectedProduct { get; set; }
     private List<CartItem> Cart { get; set; } = new List<CartItem>();
-
+    private string OutOfProductMessage { get; set; }
     private IEnumerable<ProductDto> SearchFilteredProducts => string.IsNullOrWhiteSpace(SearchTerm)
         ? Products
         : Products.Where(p => p.Name?.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) == true);
@@ -858,15 +903,23 @@
     {
         // Add to cart or increase quantity
         var existing = Cart.FirstOrDefault(ci => ci.Product.Id == product.Id);
-        if (existing != null)
+        if (product.Quantity > 0)
         {
-            existing.Quantity++;
+            if (existing != null)
+            {
+                existing.Quantity++;
+            }
+            else
+            {
+                Cart.Add(new CartItem { Product = product, Quantity = 1 });
+            }
+            await SaveCartAsync();
         }
         else
         {
-            Cart.Add(new CartItem { Product = product, Quantity = 1 });
+            OutOfProductMessage = $"The product {product.Name} is currently not available. Please place an order ):";
+            await JS.InvokeVoidAsync("eval", $"var m = new bootstrap.Modal(document.getElementById('outofproduct')); m.show();");
         }
-        await SaveCartAsync();
     }
 
     private async Task IncreaseCartItem(Guid productId)

@@ -10,6 +10,8 @@ namespace EvelynStores.Core.Entities
         public Guid ProductId { get; set; }
         public int PurchaseQuantity { get; set; }
         public int InStockQuantity { get; set; }
+        public decimal Price { get; set; }
+        public string SKU { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public int ReOrderLevel { get; set; }
          public Product Product { get; set; } = null!;
