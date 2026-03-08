@@ -15,6 +15,45 @@ public class ProductLevelsController : ControllerBase
         _levelService = levelService;
     }
 
+    [HttpGet("low")]
+    public async Task<IActionResult> GetLowStock([FromQuery] int take = 5)
+    {
+        try
+        {
+            var list = await _levelService.GetLowStockProductsAsync(take);
+            var summaries = list.Select(pl => new ProductLevelSummaryDto { 
+                ProductName = pl.ProductName, 
+                ImageUrl = pl.ImageUrl,
+                InStockQuantity = pl.InStockQuantity }).ToList();
+            return Ok(EvelynPhilApiResponse<List<ProductLevelSummaryDto>>.SuccessResponse(summaries));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, EvelynPhilApiResponse.ErrorResponse("Failed to get low stock products", 500, new List<string> { ex.Message }));
+        }
+    }
+
+        [HttpGet("random/above-reorder")]
+        public async Task<IActionResult> GetRandomAboveReorder()
+        {
+            try
+            {
+                var res = await _levelService.GetRandomAboveReorderAsync();
+                if (res == null) return NotFound(EvelynPhilApiResponse.ErrorResponse("No suitable product found", 404));
+                // Map to summary DTO for lighter payload
+                var summary = new ProductLevelSummaryDto
+                {
+                    ProductName = res.ProductName,
+                    InStockQuantity = res.InStockQuantity
+                };
+                return Ok(EvelynPhilApiResponse<ProductLevelSummaryDto>.SuccessResponse(summary));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, EvelynPhilApiResponse.ErrorResponse("Failed to get random product", 500, new List<string> { ex.Message }));
+            }
+        }
+
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -48,13 +87,13 @@ public class ProductLevelsController : ControllerBase
         }
     }
 
-    [HttpPost("set-reorder/{productId:guid}")]
-    public async Task<IActionResult> SetReOrderLevel(Guid productId, [FromBody] SetReorderRequest req)
+    [HttpPost("set-reorder/{levelId:guid}")]
+    public async Task<IActionResult> SetReOrderLevel(Guid levelId, [FromBody] SetReorderRequest req)
     {
         if (req == null) return BadRequest(EvelynPhilApiResponse.ErrorResponse("Invalid request", 400));
         try
         {
-            var updated = await _levelService.SetReOrderLevelAsync(productId, req.ReOrderLevel);
+            var updated = await _levelService.SetReOrderLevelAsync(levelId, req.ReOrderLevel);
             if (updated == null) return NotFound(EvelynPhilApiResponse.ErrorResponse("Not found", 404));
             return Ok(EvelynPhilApiResponse<ProductLevelDto>.SuccessResponse(updated));
         }

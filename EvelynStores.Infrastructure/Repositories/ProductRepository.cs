@@ -18,6 +18,9 @@ public class ProductRepository : IProductRepository
 
     public async Task<List<Product>> GetAllAsync() => await _db.Products.ToListAsync();
 
+    public async Task<List<Product>> GetRecentAsync(int take = 5) =>
+        await _db.Products.OrderByDescending(p => p.CreatedAt).Take(take).ToListAsync();
+
     public async Task<List<Product>> GetBySubCategoryAsync(Guid subCategoryId) =>
         await _db.Products.Where(p => p.SubCategoryId == subCategoryId).ToListAsync();
 

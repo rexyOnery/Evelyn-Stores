@@ -18,6 +18,15 @@ public class PurchaseRepository : IPurchaseRepository
 
     public async Task<List<Purchase>> GetAllAsync() => await _db.Purchases.ToListAsync();
 
+    public async Task<List<Purchase>> GetExpiringAsync(DateTime cutoff, int take)
+    {
+        return await _db.Purchases
+            .Where(p => p.ExpiryDate.HasValue && p.ExpiryDate.Value <= cutoff)
+            .OrderBy(p => p.ExpiryDate)
+            .Take(take)
+            .ToListAsync();
+    }
+
     public async Task<Purchase?> GetByIdAsync(Guid id) => await _db.Purchases.FindAsync(id);
 
     public async Task UpdateAsync(Purchase purchase)

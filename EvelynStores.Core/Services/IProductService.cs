@@ -10,4 +10,6 @@ public interface IProductService
     Task<List<ProductDto>> GetBySubCategoryAsync(Guid subCategoryId);
     Task<ProductDto?> UpdateAsync(Guid id, ProductDto dto);
     Task<bool> DeleteAsync(Guid id);
+    Task<List<ProductDto>> GetAllShopProductsAsync();
+    Task<List<ProductDto>> GetRecentProductsAsync(int take = 5);
 }

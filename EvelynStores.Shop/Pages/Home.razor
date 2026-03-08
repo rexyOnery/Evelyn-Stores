@@ -51,7 +51,7 @@
                                 <img width="94" height="78" src="@(string.IsNullOrWhiteSpace(cat.ImageUrl) ? "assets/img/products/pos-product-01.png" : cat.ImageUrl)" alt="@cat.Name">
                             </a>
                             <h6><a href="javascript:void(0);">@cat.Name</a></h6>
-                            <span>@(cat.ProductCount == 1 ? "1 Item" : $"{cat.ProductCount} Items")</span>
+                            @* <span>@(cat.ProductCount == 1 ? "1 Item" : $"{cat.ProductCount} Items")</span> *@
                         </li>
                     }
                 }
@@ -77,7 +77,7 @@
                                             <img src="@(string.IsNullOrWhiteSpace(prod.ImageUrl) ? "assets/img/products/pos-product-01.png" : prod.ImageUrl)" alt="@prod.Name">
                                             <span><i class="ti ti-circle-check-filled"></i></span>
                                         </a>
-                                        <h6 class="cat-name"><a href="javascript:void(0);">@FetchCategory(prod.CategoryId).Name</a></h6>
+                                        <h6 class="cat-name"><a href="javascript:void(0);">@prod.BatchNumber</a></h6>@* @FetchCategory(prod.CategoryId).Name</a></h6> *@
                                         <h6 class="product-name"><a href="javascript:void(0);">@prod.Name</a></h6>
                                         <div class="d-flex align-items-center justify-content-between price">
                                             <span>@prod.Quantity @prod.Unit</span>
@@ -100,7 +100,7 @@
                                                 <img src="@(string.IsNullOrWhiteSpace(prod.ImageUrl) ? "assets/img/products/pos-product-01.png" : prod.ImageUrl)" alt="@prod.Name">
                                                 <span><i class="ti ti-circle-check-filled"></i></span>
                                             </a>
-                                            <h6 class="cat-name"><a href="javascript:void(0);">@cat.Name</a></h6>
+                                            <h6 class="cat-name"><a href="javascript:void(0);">@prod.BatchNumber</a></h6>
                                             <h6 class="product-name"><a href="javascript:void(0);">@prod.Name</a></h6>
                                             <div class="d-flex align-items-center justify-content-between price">
                                                 <span>@prod.Quantity @prod.Unit</span>
@@ -158,13 +158,13 @@
                                     </div>
                                 </div>
                                 <div class="qty-item text-center">
-                                    <a @onclick:preventDefault="true" @onclick="async () => await DecreaseCartItem(item.Product.Id)" class="dec d-flex justify-content-center align-items-center" data-bs-toggle="tooltip" data-bs-placement="top" title="minus">
+                                    <a @onclick:preventDefault="true" @onclick="async () => await DecreaseCartItem(item.Product.Id, item.Product.BatchNumber)" class="dec d-flex justify-content-center align-items-center" data-bs-toggle="tooltip" data-bs-placement="top" title="minus">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-dash" viewBox="0 0 16 16">
                                             <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8" />
                                         </svg>
                                     </a>
                                     <input type="text" class="form-control text-center" name="qty" value="@item.Quantity" />
-                                    <a @onclick:preventDefault="true" @onclick="async () => await IncreaseCartItem(item.Product.Id)" class="inc d-flex justify-content-center align-items-center" data-bs-toggle="tooltip" data-bs-placement="top" title="plus">
+                                    <a @onclick:preventDefault="true" @onclick="async () => await IncreaseCartItem(item.Product.Id, item.Product.BatchNumber)" class="inc d-flex justify-content-center align-items-center" data-bs-toggle="tooltip" data-bs-placement="top" title="plus">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
                                             <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
                                         </svg>
@@ -902,7 +902,7 @@
     private async Task SelectProduct(ProductDto product)
     {
         // Add to cart or increase quantity
-        var existing = Cart.FirstOrDefault(ci => ci.Product.Id == product.Id);
+        var existing = Cart.FirstOrDefault(ci => ci.Product.Id == product.Id && ci.Product.BatchNumber == product.BatchNumber);
         if (product.Quantity > 0)
         {
             if (existing != null)
@@ -922,9 +922,9 @@
         }
     }
 
-    private async Task IncreaseCartItem(Guid productId)
+    private async Task IncreaseCartItem(Guid productId, string batch)
     {
-        var existing = Cart.FirstOrDefault(ci => ci.Product.Id == productId);
+        var existing = Cart.FirstOrDefault(ci => ci.Product.Id == productId && ci.Product.BatchNumber == batch);
         if (existing != null)
         {
             existing.Quantity++;
@@ -932,9 +932,9 @@
         }
     }
 
-    private async Task DecreaseCartItem(Guid productId)
+    private async Task DecreaseCartItem(Guid productId, string batch)
     {
-        var existing = Cart.FirstOrDefault(ci => ci.Product.Id == productId);
+        var existing = Cart.FirstOrDefault(ci => ci.Product.Id == productId && ci.Product.BatchNumber == batch);
         if (existing == null) return;
         existing.Quantity--;
         if (existing.Quantity <= 0) Cart.Remove(existing);
@@ -1062,8 +1062,8 @@
             var resp = respWrapper?.Data;
             if (resp != null)
             {
-                Categories = resp.OrderBy(c => c.Name).ToList();
-                var respProdictWrapper = await Http.GetFromJsonAsync<ApiResponse<List<ProductDto>>>("/api/products");
+                Categories = resp.Where(c=>c.ProductCount > 0).OrderBy(c => c.Name).ToList();
+                var respProdictWrapper = await Http.GetFromJsonAsync<ApiResponse<List<ProductDto>>>("/api/products/shop");
                 Products = respProdictWrapper?.Data.ToList() ?? new List<ProductDto>();
             }
         }

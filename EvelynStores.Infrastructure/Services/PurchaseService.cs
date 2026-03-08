@@ -14,6 +14,28 @@ public class PurchaseService : IPurchaseService
         _productLevelService = productLevelService;
     }
 
+    public async Task<List<PurchaseDto>> GetExpiringAsync(DateTime cutoff, int take)
+    {
+        // repository exposes GetExpiringAsync
+        var list = await _repo.GetExpiringAsync(cutoff, take);
+        return list.Select(p => new PurchaseDto
+        {
+            Id = p.Id,
+            SKU = p.SKU,
+            CategoryId = p.CategoryId,
+            SubCategoryId = p.SubCategoryId,
+            ProductId = p.ProductId,
+            UnitCost = p.UnitCost,
+            Quantity = p.Quantity,
+            TotalAmount = p.TotalAmount,
+            CreatedBy = p.CreatedBy,
+            CreatedAt = p.CreatedAt,
+            ManufacturedDate = p.ManufacturedDate,
+            ExpiryDate = p.ExpiryDate,
+            
+        }).ToList();
+    }
+
     public async Task<PurchaseDto> CreateAsync(PurchaseDto dto)
     {
         var p = new Purchase

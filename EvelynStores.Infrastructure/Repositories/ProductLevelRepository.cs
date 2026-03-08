@@ -24,11 +24,11 @@ public class ProductLevelRepository : IProductLevelRepository
         await _db.SaveChangesAsync();
     }
 
-    public async Task<List<ProductLevel>> GetAllAsync() => await _db.ProductLevels.ToListAsync();
+    public async Task<List<ProductLevel>> GetAllAsync() => await _db.ProductLevels.Include(pl => pl.Product).ToListAsync();
 
-    public async Task<ProductLevel?> GetByIdAsync(Guid id) => await _db.ProductLevels.FindAsync(id);
+    public async Task<ProductLevel?> GetByIdAsync(Guid id) => await _db.ProductLevels.Include(pl => pl.Product).FirstOrDefaultAsync(pl => pl.Id == id);
 
-    public async Task<ProductLevel?> GetByProductIdAsync(Guid productId) => await _db.ProductLevels.FirstOrDefaultAsync(pl => pl.ProductId == productId);
+    public async Task<ProductLevel?> GetByProductIdAsync(Guid productId) => await _db.ProductLevels.Include(pl => pl.Product).FirstOrDefaultAsync(pl => pl.ProductId == productId);
 
     public async Task UpdateAsync(ProductLevel level)
     {

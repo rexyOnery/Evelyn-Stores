@@ -85,4 +85,22 @@ public class CategoryService : ICategoryService
         await _repo.DeleteAsync(id);
         return true;
     }
+
+    public async Task<CategoryStatisticsDto> GetStatisticsAsync()
+    {
+        // Total categories and products
+        // Use the repository interface to retrieve stats
+        var totalCategories = await (_repo.GetType().GetMethod("GetTotalCategoriesAsync") != null ? ((dynamic)_repo).GetTotalCategoriesAsync() : Task.FromResult(0));
+        var totalProducts = await (_repo.GetType().GetMethod("GetTotalProductsAsync") != null ? ((dynamic)_repo).GetTotalProductsAsync() : Task.FromResult(0));
+
+        // Top 3 categories by sold items
+        var top = await (_repo.GetType().GetMethod("GetTopCategoriesBySoldItemsAsync") != null ? ((dynamic)_repo).GetTopCategoriesBySoldItemsAsync(3) : Task.FromResult(new List<EvelynStores.Core.DTOs.CategoryStatisticsBySaleItemsDto>()));
+
+        return new CategoryStatisticsDto
+        {
+            TotalCategories = totalCategories,
+            TotalCategoryProductsCount = totalProducts,
+            CategorySales = top
+        };
+    }
 }

@@ -66,10 +66,10 @@
                                     <tr>
                                         <th>Product Name</th>
                                         <th>Category</th>
-                                        <th>SKU</th>
-                                        <th>Qty</th>
-                                        <th>Qty Alert</th>
-                                        <th class="no-sort"></th>
+                                        <th>SKU/Batch</th>
+                                        <th>InStock Quantity</th>
+                                        <th>ReOrder Alert</th>
+                                        @* <th class="no-sort"></th> *@
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -89,21 +89,21 @@
                                                 <td>
                                                     <div class="d-flex align-items-center">
                                                         <a href="javascript:void(0);" class="avatar avatar-md me-2">
-                                                            <img src="@(string.IsNullOrEmpty((GetProductImage(p.ProductId))) ? "assets/img/products/stock-img-01.png" : GetProductImage(p.ProductId))" alt="product">
+                                                            <img src="@(string.IsNullOrWhiteSpace(p.ImageUrl) ? "assets/img/products/product-01.jpg" : p.ImageUrl)" alt="img">
                                                         </a>
-                                                        <a href="#" @onclick="() => ViewProduct(p.Id)" @onclick:preventDefault="true">@GetProductName(p.ProductId)</a>
+                                                        <a href="#" @onclick="() => ViewProduct(p.Id)" @onclick:preventDefault="true">@p.ProductName</a>
                                                     </div>
                                                 </td>
                                                 <td>@(Categories.FirstOrDefault(c => c.Id == p.CategoryId)?.Name ?? "-")</td>
-                                                @* <td>@p.SKU</td> *@
-                                                <td>@p.PurchaseQuantity</td>
+                                                 <td>@p.SKU</td> 
+                                                <td>@p.InStockQuantity</td>
                                                 <td>@p.ReOrderLevel</td>
-                                                <td class="action-table-data">
+                                                <!--<td class="action-table-data">
                                                     <div class="edit-delete-action">
                                                         @* <a class="me-2 p-2" href="#" @onclick="() => ShowEditStock(p)" @onclick:preventDefault="true"><i data-feather="edit" class="bi bi-folder2-open"></i></a> *@
                                                         <a class="p-2" href="#" @onclick="() => ConfirmDelete(p.Id)" @onclick:preventDefault="true"><i data-feather="trash-2" class="bi bi-trash3"></i></a>
                                                     </div>
-                                                </td>
+                                                </td>-->
                                             </tr>
                                         }
                                     }
@@ -145,10 +145,10 @@
 
                                         <th>Product Name</th>
                                         <th>Category</th>
-                                        @* <th>SKU</th> *@
-                                        <th>Qty</th>
-                                        <th>Qty Alert</th>
-                                        <th class="no-sort">Action</th>
+                                        <th>SKU</th>
+                                        <th>Quantity Instock</th>
+                                        <th>ReOrder Alert</th>
+                                       @*  <th class="no-sort">Action</th> *@
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -168,21 +168,21 @@
                                                 <td>
                                                     <div class="d-flex align-items-center">
                                                         <a href="javascript:void(0);" class="avatar avatar-md me-2">
-                                                            <img src="@(string.IsNullOrEmpty((GetProductImage(p.ProductId))) ? "assets/img/products/stock-img-01.png" : GetProductImage(p.ProductId))" alt="product">
+                                                            <img src="@(string.IsNullOrWhiteSpace(p.ImageUrl) ? "assets/img/products/product-01.jpg" : p.ImageUrl)" alt="img">
                                                         </a>
-                                                        <a href="#" @onclick="() => ViewProduct(p.ProductId)" @onclick:preventDefault="true">@GetProductName(p.ProductId)</a>
+                                                        <a href="#" @onclick="() => ViewProduct(p.Id)" @onclick:preventDefault="true">@p.ProductName</a>
                                                     </div>
                                                 </td>
                                                 <td>@(Categories.FirstOrDefault(c => c.Id == p.CategoryId)?.Name ?? "-")</td>
-                                                @* <td>@p.SKU</td> *@
-                                                <td>@p.PurchaseQuantity</td>
+                                                <td>@p.SKU</td>
+                                                <td>@p.InStockQuantity</td>
                                                 <td>@p.ReOrderLevel</td>
-                                                <td class="action-table-data">
+                                               <!-- <td class="action-table-data">
                                                     <div class="edit-delete-action">
                                                         @* <a class="me-2 p-2" href="#" @onclick="() => ShowEditStock(p)" @onclick:preventDefault="true"><i data-feather="edit" class="bi bi-folder2-open"></i></a> *@
                                                         <a class="p-2" href="#" @onclick="() => ConfirmDelete(p.Id)" @onclick:preventDefault="true"><i data-feather="trash-2" class="bi bi-trash3"></i></a>
                                                     </div>
-                                                </td>
+                                                 </td>-->
                                             </tr>
                                         }
                                     }
@@ -331,7 +331,7 @@
         OutOfStockList = null;
         try
         {
-            var res = await ApiClient.GetAsync<List<ProductLevelDto>>("/api/productlevel");
+            var res = await ApiClient.GetAsync<List<ProductLevelDto>>("/api/productlevels");
             if (res.Success && res.Data != null)
             {
                 AllProducts = res.Data.OrderByDescending(p => p.InStockQuantity).ToList();
@@ -406,10 +406,10 @@
         }
 
         // Low stock: quantity <= reorder level but > 0
-        LowStockList = q.Where(p => p.PurchaseQuantity > 0 && p.PurchaseQuantity <= p.ReOrderLevel).OrderBy(p => p.PurchaseQuantity).ToList();
+        LowStockList = q.Where(p => p.InStockQuantity <= p.ReOrderLevel).OrderBy(p => p.InStockQuantity).ToList();
 
         // Out of stock: quantity == 0
-        OutOfStockList = q.Where(p => p.PurchaseQuantity == 0).OrderBy(p => p.ProductId).ToList();
+        OutOfStockList = q.Where(p => p.InStockQuantity == 0).OrderBy(p => p.ProductId).ToList();
     }
     private string GetProductName(Guid id) => Products.FirstOrDefault(p => p.Id == id)?.Name ?? "-";
     private string GetProductImage(Guid id) => Products.FirstOrDefault(p => p.Id == id)?.ImageUrl ?? "-";

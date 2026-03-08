@@ -7,13 +7,22 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EvelynStores.Infrastructure.Services;
 
-public class SaleService : ISaleService
+public partial class SaleService : ISaleService
 {
     private readonly EvelynStoresDbContext _context;
 
     public SaleService(EvelynStoresDbContext context)
     {
         _context = context;
+    }
+
+    public async Task<int> GetSalesCountForDateAsync(DateTime dateUtc)
+    {
+        var start = dateUtc.Date;
+        var end = start.AddDays(1).AddTicks(-1);
+        return await _context.Sales
+            .Where(s => s.CreatedAt >= start && s.CreatedAt <= end)
+            .CountAsync();
     }
 
     public async Task<SaleDto> CreateSaleAsync(CreateSaleDto dto)

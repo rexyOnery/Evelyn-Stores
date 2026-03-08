@@ -69,6 +69,8 @@
                     <thead>
                         <tr>
                             <th>Product</th>
+                            <th>SKU/Batch</th>
+                            <th>Selling Price</th>  
                             <th>Purchased QTY</th>
                             <th>In Stock QTY</th>
                             <th>Re-Order Level</th>
@@ -98,12 +100,14 @@
                                             <span>@(prod?.Name ?? "-")</span>
                                         </div>
                                     </td>
+                                    <td>@pl.SKU</td>
+                                    <td>@pl.Price.ToString("C0").Substring(1)</td>
                                     <td>@pl.PurchaseQuantity</td>
                                     <td>@pl.InStockQuantity</td>
                                     <td>@pl.ReOrderLevel</td>
                                     <td class="action-table-data">
                                         <div class="edit-delete-action">
-                                            <a class="me-2 p-2" href="#" @onclick="() => ShowReorderModal(pl.ProductId)" @onclick:preventDefault="true" title="Set Reorder Level">
+                                            <a class="me-2 p-2" href="#" @onclick="() => ShowReorderModal(pl.ProductId, pl.Id )" @onclick:preventDefault="true" title="Set Reorder Level">
                                                 <i data-feather="edit" class="bi bi-pencil-square"></i>
                                             </a>
                                         </div>
@@ -233,10 +237,10 @@
     private Guid CurrentProductIdForReorder { get; set; }
     private int NewReorderLevel { get; set; }
 
-    private void ShowReorderModal(Guid productId)
+    private void ShowReorderModal(Guid productId, Guid ProductLevelId)
     {
-        CurrentProductIdForReorder = productId;
-        var existing = Levels?.FirstOrDefault(l => l.ProductId == productId);
+        CurrentProductIdForReorder = ProductLevelId;
+        var existing = Levels?.FirstOrDefault(l => l.ProductId == productId && l.Id == ProductLevelId);
         NewReorderLevel = existing?.ReOrderLevel ?? 0;
         IsReorderModalOpen = true;
     }

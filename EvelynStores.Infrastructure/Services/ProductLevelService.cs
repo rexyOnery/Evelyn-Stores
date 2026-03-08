@@ -18,6 +18,33 @@ public class ProductLevelService : IProductLevelService
         {
             pl.InStockQuantity = pl.PurchaseQuantity;
         }
+
+    }
+
+    public async Task<List<ProductLevelDto>> GetLowStockProductsAsync(int take = 5)
+    {
+        var list = await _repo.GetAllAsync();
+        // low stock defined as InStockQuantity <= ReOrderLevel (or close to it)
+        var low = list.Where(pl => pl.InStockQuantity <= pl.ReOrderLevel)
+                      .OrderBy(pl => pl.InStockQuantity)
+                      .Take(take)
+                      .Select(pl => new ProductLevelDto
+                      {
+                          Id = pl.Id,
+                          ProductId = pl.ProductId,
+                          PurchaseQuantity = pl.PurchaseQuantity,
+                          InStockQuantity = pl.InStockQuantity,
+                          ReOrderLevel = pl.ReOrderLevel,
+                          Price = pl.Price,
+                          SKU = pl.SKU,
+                          CategoryId = pl.Product?.CategoryId ?? Guid.Empty,
+                          ProductName = pl.Product?.Name ?? string.Empty,
+                          Unit = pl.Product?.Unit ?? string.Empty,
+                          ProductQuantity = pl.Product?.Quantity ?? pl.InStockQuantity,
+                          ImageUrl = pl.Product?.ImageUrl ?? string.Empty
+                      }).ToList();
+
+        return low;
     }
     public async Task<ProductLevelDto> CreateOrUpdateForPurchaseAsync(Guid productId, int purchaseQuantity)
     {
@@ -149,7 +176,14 @@ public class ProductLevelService : IProductLevelService
             PurchaseQuantity = existing.PurchaseQuantity,
             InStockQuantity = existing.InStockQuantity,
             ReOrderLevel = existing.ReOrderLevel,
-            SKU = existing.SKU
+            
+            SKU = existing.SKU,
+            Price = existing.Price,
+            CategoryId = existing.Product?.CategoryId ?? Guid.Empty,
+            ProductName = existing.Product?.Name ?? string.Empty,
+            Unit = existing.Product?.Unit ?? string.Empty,
+            ProductQuantity = existing.Product?.Quantity ?? existing.InStockQuantity,
+            ImageUrl = existing.Product?.ImageUrl ?? string.Empty
         };
     }
 
@@ -162,8 +196,43 @@ public class ProductLevelService : IProductLevelService
             ProductId = existing.ProductId,
             PurchaseQuantity = existing.PurchaseQuantity,
             InStockQuantity = existing.InStockQuantity,
-            ReOrderLevel = existing.ReOrderLevel
+            ReOrderLevel = existing.ReOrderLevel,
+            Price = existing.Price,
+            SKU = existing.SKU,
+            CategoryId = existing.Product?.CategoryId ?? Guid.Empty,
+            ProductName = existing.Product?.Name ?? string.Empty,
+            Unit = existing.Product?.Unit ?? string.Empty,
+            ProductQuantity = existing.Product?.Quantity ?? existing.InStockQuantity,
+            ImageUrl = existing.Product?.ImageUrl ?? string.Empty
         }).ToList();
+    }
+
+    public async Task<ProductLevelDto?> GetRandomAboveReorderAsync()
+    {
+        // Fetch all product levels with their product navigation included (repo does eager-load)
+        var list = await _repo.GetAllAsync();
+        // Filter product levels where ReOrderLevel < InStockQuantity
+        var candidates = list.Where(pl => pl.ReOrderLevel >= pl.InStockQuantity).ToList();
+        if (!candidates.Any()) return null;
+
+        var rnd = new Random();
+        var pick = candidates[rnd.Next(candidates.Count)];
+
+        return new ProductLevelDto
+        {
+            Id = pick.Id,
+            ProductId = pick.ProductId,
+            PurchaseQuantity = pick.PurchaseQuantity,
+            InStockQuantity = pick.InStockQuantity,
+            ReOrderLevel = pick.ReOrderLevel,
+            Price = pick.Price,
+            SKU = pick.SKU,
+            CategoryId = pick.Product?.CategoryId ?? Guid.Empty,
+            ProductName = pick.Product?.Name ?? string.Empty,
+            Unit = pick.Product?.Unit ?? string.Empty,
+            ProductQuantity = pick.Product?.Quantity ?? pick.InStockQuantity,
+            ImageUrl = pick.Product?.ImageUrl ?? string.Empty
+        };
     }
 
     public async Task<ProductLevelDto> CreateAsync(ProductLevelDto dto)
@@ -220,7 +289,7 @@ public class ProductLevelService : IProductLevelService
 
     public async Task<ProductLevelDto?> SetReOrderLevelAsync(Guid productId, int reorderLevel)
     {
-        var existing = await _repo.GetByProductIdAsync(productId);
+        var existing = await _repo.GetByIdAsync(productId);//.GetByProductIdAsync(productId);
         if (existing == null) return null;
         existing.ReOrderLevel = reorderLevel;
         EnsureInStockFallback(existing);

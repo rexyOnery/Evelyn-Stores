@@ -22,6 +22,14 @@ public class PurchasesController : ControllerBase
         return Ok(EvelynPhilApiResponse<List<PurchaseDto>>.SuccessResponse(list));
     }
 
+    [HttpGet("expiring")]
+    public async Task<IActionResult> GetExpiring([FromQuery] int months = 2, [FromQuery] int take = 5)
+    {
+        var cutoff = DateTime.UtcNow.AddMonths(months);
+        var list = await _purchaseService.GetExpiringAsync(cutoff, take);
+        return Ok(EvelynPhilApiResponse<List<PurchaseDto>>.SuccessResponse(list));
+    }
+
     [HttpGet("{id}")]
     public async Task<IActionResult> Get(Guid id)
     {

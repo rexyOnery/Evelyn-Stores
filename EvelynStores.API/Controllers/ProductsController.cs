@@ -17,6 +17,13 @@ public class ProductsController : ControllerBase
         _productService = productService;
     }
 
+    [HttpGet("shop")]
+    public async Task<IActionResult> GetAllShopProducts()
+    { 
+        var all = await _productService.GetAllShopProductsAsync();
+        return Ok(EvelynPhilApiResponse<List<ProductDto>>.SuccessResponse(all));
+    }
+
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] Guid? subCategoryId)
     {
@@ -24,6 +31,13 @@ public class ProductsController : ControllerBase
         {
             var list = await _productService.GetBySubCategoryAsync(subCategoryId.Value);
             return Ok(EvelynPhilApiResponse<List<ProductDto>>.SuccessResponse(list));
+        }
+
+        // support optional 'recent' query to return most recently added products
+        if (Request.Query.ContainsKey("recent") && bool.TryParse(Request.Query["recent"], out var recent) && recent)
+        {
+            var recentList = await _productService.GetRecentProductsAsync(5);
+            return Ok(EvelynPhilApiResponse<List<ProductDto>>.SuccessResponse(recentList));
         }
 
         var all = await _productService.GetAllAsync();

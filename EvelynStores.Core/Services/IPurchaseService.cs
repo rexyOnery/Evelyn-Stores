@@ -9,4 +9,5 @@ public interface IPurchaseService
     Task<List<PurchaseDto>> GetAllAsync();
     Task<PurchaseDto?> UpdateAsync(Guid id, PurchaseDto dto);
     Task<bool> DeleteAsync(Guid id);
+    Task<List<PurchaseDto>> GetExpiringAsync(DateTime cutoff, int take);
 }

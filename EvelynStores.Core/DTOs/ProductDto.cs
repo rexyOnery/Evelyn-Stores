@@ -29,7 +29,7 @@ public class ProductDto
     public string ImageUrl { get; set; } = string.Empty;
     public string CreatedBy { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
+    public string BatchNumber { get; set; }
     // Persisted custom fields
     //public DateTime? ManufacturedDate { get; set; }
     //public DateTime? ExpiryDate { get; set; }

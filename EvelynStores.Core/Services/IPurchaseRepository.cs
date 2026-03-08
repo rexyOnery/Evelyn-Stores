@@ -9,4 +9,6 @@ public interface IPurchaseRepository
     Task AddAsync(Purchase purchase);
     Task UpdateAsync(Purchase purchase);
     Task DeleteAsync(Guid id);
+    Task<List<Purchase>> GetExpiringAsync(DateTime cutoff, int take);
+    
 }

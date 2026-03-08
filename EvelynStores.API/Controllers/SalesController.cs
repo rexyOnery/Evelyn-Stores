@@ -22,6 +22,14 @@ public class SalesController : ControllerBase
         return Ok(EvelynPhilApiResponse<IEnumerable<SaleDto>>.SuccessResponse(sales));
     }
 
+    [HttpGet("count/today")]
+    public async Task<IActionResult> GetTodayCount()
+    {
+        var utcNow = DateTime.UtcNow.Date;
+        var count = await _saleService.GetSalesCountForDateAsync(utcNow);
+        return Ok(EvelynPhilApiResponse<int>.SuccessResponse(count));
+    }
+
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id)
     {

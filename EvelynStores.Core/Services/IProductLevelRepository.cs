@@ -4,7 +4,7 @@ namespace EvelynStores.Core.Services;
 
 public interface IProductLevelRepository
 {
-    Task<List<ProductLevel>> GetAllAsync();
+    Task<List<ProductLevel>> GetAllAsync(); // Updated method signature for clarity
     Task<ProductLevel?> GetByIdAsync(Guid id);
     Task<ProductLevel?> GetByProductIdAsync(Guid productId);
     Task AddAsync(ProductLevel level);

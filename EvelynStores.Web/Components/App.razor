@@ -68,9 +68,7 @@
     <script src="assets/js/jquery.min.js"></script>
     <script src="assets/plugins/toastr/toastr.min.js"></script>
 
-    <script src="@Assets["_framework/blazor.web.js"]"></script>
-    <!-- /Main Wrapper -->
-    <!-- jQuery --> 
+    <!-- jQuery (ensure available for plugins) -->
     <script src="assets/js/jquery-3.7.1.min.js"></script>
 
     <!-- Feather Icon JS -->
@@ -86,9 +84,13 @@
     <script src="assets/js/moment.min.js"></script>
     <script src="assets/plugins/daterangepicker/daterangepicker.js"></script>
 
-    <!-- Chart JS -->
+    <!-- Chart JS (load before Blazor so interop helpers are available at runtime) -->
     <script src="assets/plugins/chartjs/chart.min.js"></script>
     <script src="assets/plugins/chartjs/chart-data.js"></script>
+
+    <!-- EvelynChart helper (provides window.EvelynChart) -->
+    <script src="assets/js/EvelynChart.js"></script> 
+   
 
     <!-- Select2 JS -->
     <script src="assets/plugins/select2/js/select2.min.js"></script>
@@ -103,7 +105,8 @@
     <!-- Custom JS -->
     <script src="assets/js/theme-colorpicker.js"></script>
     <script src="assets/js/script.js"></script>
-
+    <script src="@Assets["_framework/blazor.web.js"]"></script>
+    <!-- /Main Wrapper -->
 </body>
 
 </html>

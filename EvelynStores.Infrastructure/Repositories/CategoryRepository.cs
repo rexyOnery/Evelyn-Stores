@@ -14,6 +14,29 @@ public class CategoryRepository : ICategoryRepository
         _db = db;
     }
 
+    public async Task<int> GetTotalCategoriesAsync() => await _db.Categories.CountAsync();
+
+    public async Task<int> GetTotalProductsAsync() => await _db.Products.CountAsync();
+
+    /// <summary>
+    /// Returns top categories by number of sold items (joins Sales -> SaleItems -> Products -> Categories)
+    /// </summary>
+    public async Task<List<Core.DTOs.CategoryStatisticsBySaleItemsDto>> GetTopCategoriesBySoldItemsAsync(int take = 3)
+    {
+        var query = from si in _db.SaleItems
+                    join p in _db.Products on si.ProductId equals p.Id
+                    join c in _db.Categories on p.CategoryId equals c.Id
+                    group si by new { c.Id, c.Name } into g
+                    select new Core.DTOs.CategoryStatisticsBySaleItemsDto
+                    {
+                        CategoryName = g.Key.Name,
+                        TotalCategorySaleItems = g.Count()
+                    };
+
+        return await query.OrderByDescending(x => x.TotalCategorySaleItems).Take(take).ToListAsync();
+    }
+    
+
     public async Task<List<Category>> GetAllAsync()
     {
         // Fetch categories and product counts in a single query

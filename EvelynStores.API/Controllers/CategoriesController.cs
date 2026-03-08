@@ -26,6 +26,20 @@ public class CategoriesController : ControllerBase
         return Ok(EvelynPhilApiResponse<List<CategoryDto>>.SuccessResponse(cats));
     }
 
+    [HttpGet("statistics")]
+    public async Task<IActionResult> GetStatistics()
+    {
+        try
+        {
+            var stats = await _categoryService.GetStatisticsAsync();
+            return Ok(EvelynPhilApiResponse<CategoryStatisticsDto>.SuccessResponse(stats));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, EvelynPhilApiResponse.ErrorResponse("Failed to get category statistics", 500, new List<string> { ex.Message }));
+        }
+    }
+
     [HttpGet("{id}")]
     public async Task<IActionResult> Get(Guid id)
     {

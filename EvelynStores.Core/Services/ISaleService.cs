@@ -12,5 +12,6 @@ namespace EvelynStores.Core.Services
         Task<SaleDto?> GetSaleByTransactionIdAsync(string transactionId);
         Task<IEnumerable<SaleDto>> GetAllSalesAsync();
         Task<IEnumerable<SaleDto>> GetSalesByDateRangeAsync(DateTime startDate, DateTime endDate);
+        Task<int> GetSalesCountForDateAsync(DateTime dateUtc);
     }
 }

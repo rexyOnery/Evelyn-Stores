@@ -11,4 +11,6 @@ public interface IProductLevelService
     Task<ProductLevelDto?> SetReOrderLevelAsync(Guid productId, int reorderLevel);
     Task<ProductLevelDto?> AdjustPurchaseQuantityAsync(Guid productId, int delta);
     Task<ProductLevelDto> CreateAsync(ProductLevelDto dto);
+    Task<ProductLevelDto?> GetRandomAboveReorderAsync();
+    Task<List<ProductLevelDto>> GetLowStockProductsAsync(int take = 5);
 }
