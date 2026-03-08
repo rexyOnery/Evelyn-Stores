@@ -35,4 +35,20 @@ public class UserRepository(EvelynStoresDbContext dbContext) : IUserRepository
         dbContext.Users.Update(user);
         await dbContext.SaveChangesAsync();
     }
+
+    public async Task<List<User>> GetAllAsync()
+    {
+        return await dbContext.Users
+            .OrderByDescending(u => u.CreatedAt)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task DeleteAsync(Guid id)
+    {
+        var user = await dbContext.Users.FindAsync(id);
+        if (user is null) return;
+        dbContext.Users.Remove(user);
+        await dbContext.SaveChangesAsync();
+    }
 }

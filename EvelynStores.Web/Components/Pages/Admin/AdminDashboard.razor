@@ -31,7 +31,7 @@
                 <span><i class="ti ti-info-circle fs-14 text-orange me-2"></i>Your Product </span>
                 <span class="text-orange fw-semibold">@LowStockProduct.ProductName is running low!</span>
                 <span> only @LowStockProduct.InStockQuantity Pcs left. </span>
-                <a href="javascript:void(0);" class="link-orange text-decoration-underline fw-semibold" data-bs-toggle="modal" data-bs-target="#add-stock">Add Stock</a>
+                <a href="/admin/add-purchases" class="link-orange text-decoration-underline fw-semibold">Add Stock</a>
 
             </div>
             <button type="button" class="btn-close text-gray-9 fs-14" data-bs-dismiss="alert" aria-label="Close"><i class="ti ti-x"></i></button>
@@ -47,8 +47,8 @@
                     <div class="ms-2">
                         <p class="text-white mb-1">Total Sales</p>
                         <div class="d-inline-flex align-items-center flex-wrap gap-2">
-                            <h4 class="text-white">$48,988,078</h4>
-                            <span class="badge badge-soft-primary"><i class="ti ti-arrow-up me-1"></i>+22%</span>
+                            <h4 class="text-white">₦@(TotalSales.ToString("C0").Substring(1))</h4>
+                            @* <span class="badge badge-soft-primary"><i class="ti ti-arrow-up me-1"></i>+22%</span> *@
                         </div>
                     </div>
                 </div>
@@ -58,13 +58,13 @@
             <div class="card bg-secondary sale-widget flex-fill">
                 <div class="card-body d-flex align-items-center">
                     <span class="sale-icon bg-white text-secondary">
-                        <i class="ti ti-repeat fs-24"></i>
+                        <i class="ti ti-shopping-cart fs-24"></i>
                     </span>
                     <div class="ms-2">
-                        <p class="text-white mb-1">Total Sales Return</p>
+                        <p class="text-white mb-1">Total Products Ordered</p>
                         <div class="d-inline-flex align-items-center flex-wrap gap-2">
-                            <h4 class="text-white">$16,478,145</h4>
-                            <span class="badge badge-soft-danger"><i class="ti ti-arrow-down me-1"></i>-22%</span>
+                            <h4 class="text-white">@TotalProductsOrdered.ToString("N0")</h4>
+                           @*  <span class="badge badge-soft-danger"><i class="ti ti-arrow-down me-1"></i>-22%</span> *@
                         </div>
                     </div>
                 </div>
@@ -77,10 +77,10 @@
                         <i class="ti ti-gift fs-24"></i>
                     </span>
                     <div class="ms-2">
-                        <p class="text-white mb-1">Total Purchase</p>
+                        <p class="text-white mb-1">Total Purchase Cost</p>
                         <div class="d-inline-flex align-items-center flex-wrap gap-2">
-                            <h4 class="text-white">$24,145,789</h4>
-                            <span class="badge badge-soft-success"><i class="ti ti-arrow-up me-1"></i>+22%</span>
+                            <h4 class="text-white">₦@TotalProductsPurchased.ToString("C0").Substring(1)</h4>
+                            @* <span class="badge badge-soft-success"><i class="ti ti-arrow-up me-1"></i>+22%</span> *@
                         </div>
                     </div>
                 </div>
@@ -90,13 +90,13 @@
             <div class="card bg-info sale-widget flex-fill">
                 <div class="card-body d-flex align-items-center">
                     <span class="sale-icon bg-white text-info">
-                        <i class="ti ti-brand-pocket fs-24"></i>
+                        <i class="ti ti-users fs-24"></i>
                     </span>
                     <div class="ms-2">
-                        <p class="text-white mb-1">Total Purchase Return</p>
+                        <p class="text-white mb-1">Total Customers</p>
                         <div class="d-inline-flex align-items-center flex-wrap gap-2">
-                            <h4 class="text-white">$18,458,747</h4>
-                            <span class="badge badge-soft-success"><i class="ti ti-arrow-up me-1"></i>+22%</span>
+                            <h4 class="text-white">@TotalCustomers.ToString("N0")</h4>
+                            @* <span class="badge badge-soft-success"><i class="ti ti-arrow-up me-1"></i>+22%</span> *@
                         </div>
                     </div>
                 </div>
@@ -104,8 +104,8 @@
         </div>
     </div>
 
-
-    <div class="row">
+    
+   @*  <div class="row">
 
         <!-- Profit -->
         <div class="col-xl-3 col-sm-6 col-12 d-flex">
@@ -193,11 +193,11 @@
         <!-- /Returns -->
 
     </div>
-
+    
     <div class="row">
 
         <!-- Sales & Purchase -->
-        <div class="col-xxl-8 col-xl-7 col-sm-12 col-12 d-flex">
+        <div class="col-xxl-8 col--7 col-sm-12 col-12 d-flex">
             <div class="card flex-fill">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <div class="d-inline-flex align-items-center">
@@ -318,7 +318,7 @@
             </div>
         </div>
     </div>
-
+ *@
     <div class="row">
 
         <!-- Top Selling Products -->
@@ -669,6 +669,9 @@
 </div>
 @code {
     private decimal TotalSales { get; set; }
+    private decimal TotalProductsPurchased { get; set; }
+    private int TotalProductsOrdered { get; set; }
+    private int TotalCustomers { get; set; }
     private List<TopProduct> TopSellingProducts { get; set; } = new();
     private int TodayOrdersCount { get; set; }
     private Core.DTOs.ProductLevelSummaryDto? LowStockProduct { get; set; }
@@ -724,7 +727,26 @@
                 if (countResp?.Data != null)
                 {
                     TodayOrdersCount = countResp.Data;
-                } 
+                }
+
+                // fetch total sale items count
+                var saleItemsCountResp = await ApiClient.GetAsync<int>("/api/saleitems/count");
+                if (saleItemsCountResp?.Data != null)
+                {
+                    TotalProductsOrdered = saleItemsCountResp.Data;
+                }
+                var saleItemsPurchases = await ApiClient.GetAsync<decimal>("/api/saleitems/total");
+                if (saleItemsPurchases?.Data != null)
+                {
+                    TotalProductsPurchased = saleItemsPurchases.Data;
+                }
+
+                // fetch total sales count
+                var totalSalesCountResp = await ApiClient.GetAsync<int>("/api/sales/count");
+                if (totalSalesCountResp?.Data != null)
+                {
+                    TotalCustomers = totalSalesCountResp.Data;
+                }
 
                 //fetch product expiry
                 var respExpiry = await ApiClient.GetAsync<List<PurchaseDto>>("/api/purchases/expiring");

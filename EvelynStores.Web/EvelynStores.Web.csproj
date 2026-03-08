@@ -21,4 +21,8 @@
     <ProjectReference Include="..\EvelynStores.Application\EvelynStores.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Components\Templates\NewFolder\" />
+  </ItemGroup>
+
 </Project>

@@ -13,5 +13,8 @@ namespace EvelynStores.Core.Services
         Task<IEnumerable<SaleDto>> GetAllSalesAsync();
         Task<IEnumerable<SaleDto>> GetSalesByDateRangeAsync(DateTime startDate, DateTime endDate);
         Task<int> GetSalesCountForDateAsync(DateTime dateUtc);
+
+        /// <summary>Returns the total number of sales across all dates.</summary>
+        Task<int> GetTotalSalesCountAsync();
     }
 }

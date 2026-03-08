@@ -44,5 +44,15 @@ namespace EvelynStores.Infrastructure.Services
 
             return items;
         }
+
+        public async Task<int> GetTotalCountAsync()
+        {
+            return await _context.SaleItems.AsNoTracking().CountAsync();
+        }
+
+        public async Task<decimal> GetTotalLineTotalAsync()
+        {
+            return await _context.SaleItems.AsNoTracking().SumAsync(si => si.LineTotal);
+        }
     }
 }

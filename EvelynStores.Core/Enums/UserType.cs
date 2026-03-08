@@ -7,7 +7,6 @@ namespace EvelynStores.Core.Enums
     public enum UserType
     {    
         Admin = 1,
-        Customer = 2,
-        Vendor = 3
+        Sales = 2 
     }
 }

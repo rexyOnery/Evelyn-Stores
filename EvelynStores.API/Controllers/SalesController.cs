@@ -22,6 +22,20 @@ public class SalesController : ControllerBase
         return Ok(EvelynPhilApiResponse<IEnumerable<SaleDto>>.SuccessResponse(sales));
     }
 
+    [HttpGet("count")]
+    public async Task<IActionResult> GetTotalCount()
+    {
+        try
+        {
+            var count = await _saleService.GetTotalSalesCountAsync();
+            return Ok(EvelynPhilApiResponse<int>.SuccessResponse(count));
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, EvelynPhilApiResponse.ErrorResponse("Failed to get total sales count", 500, new List<string> { ex.Message }));
+        }
+    }
+
     [HttpGet("count/today")]
     public async Task<IActionResult> GetTodayCount()
     {

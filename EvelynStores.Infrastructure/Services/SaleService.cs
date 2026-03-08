@@ -25,6 +25,11 @@ public partial class SaleService : ISaleService
             .CountAsync();
     }
 
+    public async Task<int> GetTotalSalesCountAsync()
+    {
+        return await _context.Sales.AsNoTracking().CountAsync();
+    }
+
     public async Task<SaleDto> CreateSaleAsync(CreateSaleDto dto)
     {
         var transactionId = GenerateTransactionId();

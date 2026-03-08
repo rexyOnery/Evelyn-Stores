@@ -52,6 +52,7 @@ public static class ServiceExtension
             services.AddScoped<IProductLevelRepository, ProductLevelRepository>();
             services.AddScoped<ISaleService, SaleService>();
             services.AddScoped<ISaleItemService, SaleItemService>();
+            services.AddScoped<IUserService, UserService>();
 
         return services;
     }

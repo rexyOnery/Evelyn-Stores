@@ -4,9 +4,11 @@ namespace EvelynStores.Core.Services;
 
 public interface IUserRepository
 {
+    Task<List<User>> GetAllAsync();
     Task<User?> GetByEmailAsync(string email);
     Task<bool> EmailExistsAsync(string email);
     Task AddAsync(User user);
     Task<User?> GetByIdAsync(Guid id);
     Task UpdateAsync(User user);
+    Task DeleteAsync(Guid id);
 }
